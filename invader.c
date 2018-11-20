@@ -33,19 +33,25 @@ struct list
   struct list *Previous;
 };
 
+/* list functions */
+struct list *AddElement(struct *list, struct list element);
+struct list *RemoveElement(struct *list, struct list element);
+
+/* draw support */
 void ShowSplashScreen();
 void Draw();
 
+/* helpers */
 void Init();
+void FreeAll();
 
+/* game logic */
 void MoveInvaders();
 void MoveProjectiles();
 void MovePlayer();
 void RemoveDefeatedEntities();
 void DetectCollision();
 void Shot();
-
-void FreeAll();
 
 int main (void)
 {
