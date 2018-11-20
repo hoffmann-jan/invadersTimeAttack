@@ -34,8 +34,11 @@ struct list
 };
 
 /* list functions */
-struct list *AddElement(struct *list, struct list element);
-struct list *RemoveElement(struct *list, struct list element);
+struct list* AddElement(struct list *listElement, struct list *newElement);
+struct list* InsertElement(struct list *listElement, struct list *newElement);
+struct list* RemoveAndDestroyElement(struct list *removeElement);
+struct list* GetFirstElement(struct list *listElement);
+struct list* GetLastElement(struct list *listElement);
 
 /* draw support */
 void ShowSplashScreen();
@@ -102,4 +105,104 @@ void ShowSplashScreen()
 void Init()
 {
 
+}
+
+struct list* AddElement(struct list *listElement, struct list *newElement)
+{
+    if (listElement == NULL)
+    {
+      newElement->Previous = NULL;
+      newElement->Next = NULL;
+      return newElement;
+    }
+    else
+    {
+        listElement = GetLastElement(listElement);
+        listElement->Next = newElement;
+        listElement->Next->Previous = listElement;
+        listElement->Next->Next = NULL;
+    }
+
+    return listElement;
+}
+
+struct list* InsertElement(struct list *listElement, struct list *newElement)
+{
+    if (listElement == NULL)
+    {
+      newElement->Previous = NULL;
+      newElement->Next = NULL;
+      return newElement;
+    }
+    else
+    {
+        listElement = GetFirstElement(listElement);
+        listElement->Previous = newElement;
+        listElement->Previous->Next = listElement;
+        listElement->Previous->Previous = NULL;
+    }
+
+    return listElement;
+}
+
+struct list* RemoveAndDestroyElement(struct list *removeElement)
+{
+    struct list *returnElement = NULL;
+  /* element in the middle of list */
+  if (removeElement->Next != NULL && removeElement->Previous != NULL)
+  {
+    struct list *leftElement = removeElement->Previous;
+    struct list *rightElement = removeElement->Next;
+
+    leftElement->Next = rightElement;
+    rightElement->Previous = leftElement;
+
+    returnElement = rightElement;
+  }
+  /* element stand alone */
+  else if (removeElement->Next == NULL && removeElement->Previous == NULL)
+  {
+    returnElement = NULL;
+  }
+  /* is first element */
+  else if (removeElement == GetFirstElement(removeElement))
+  {
+    struct list *rightElement = removeElement->Next;
+    rightElement->Previous = NULL;
+
+    returnElement = rightElement;
+  }
+  /* is last element */
+  else if (removeElement == GetLastElement(removeElement))
+  {
+    struct list *leftElement = removeElement->Previous;
+    leftElement->Next = NULL;
+
+    returnElement = leftElement;
+  }
+
+  free(removeElement);
+  return returnElement;
+}
+
+struct list* GetFirstElement(struct list *listElement)
+{
+  if (listElement == NULL)
+        return NULL;
+    while (listElement->Previous != NULL)
+    {
+        listElement = listElement->Previous;
+    }
+    return listElement;
+}
+
+struct list* GetLastElement(struct list *listElement)
+{
+  if (listElement == NULL)
+        return NULL;
+    while (listElement->Next != NULL)
+    {
+        listElement = listElement->Next;
+    }
+    return listElement;
 }
