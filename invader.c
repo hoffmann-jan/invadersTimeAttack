@@ -104,7 +104,7 @@ int main (void)
   ShowSplashScreen();
 
   /* game initialisation */
-  Init();
+  //Init();
 
   /* game loop */
   while (true)
