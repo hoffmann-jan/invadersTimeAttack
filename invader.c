@@ -4,13 +4,22 @@
 #include <stdio.h>
 /* add bool */ 
 #include <stdbool.h>
+/* malloc etc. */
+#include <stdlib.h>
 
 /* define terminal functions */
 #define ClearTerminal() printf("\033[H\033[J")
 #define GoToTerminalPosition(x,y) printf("\033[%d;%dH", (x), (y))
 /* define Invader dimension */
-#define InvaderPerRow 11
-#define InvaderRowCount 5
+#define __InvaderPerRow 11
+#define __InvaderRowCount 5
+/* define inital values */
+#define __InitialPlayerHealth 3
+#define __InvaderHorizontalSpace 4
+#define __InvaderVerticalSpace 2
+#define __InvaderFirstColumn 0
+#define __InvaderFirstRow 0
+#define __ShieldObjectHealth 5
 
 struct Position
 {
@@ -26,19 +35,20 @@ struct Entity
   bool SymbolSwitch;
 };
 
-struct list 
+struct List 
 {
   struct Entity *Entity;
-  struct list *Next;
-  struct list *Previous;
+  struct List *Next;
+  struct List *Previous;
 };
 
-/* list functions */
-struct list* AddElement(struct list *listElement, struct list *newElement);
-struct list* InsertElement(struct list *listElement, struct list *newElement);
-struct list* RemoveAndDestroyElement(struct list *removeElement);
-struct list* GetFirstElement(struct list *listElement);
-struct list* GetLastElement(struct list *listElement);
+/* List functions */
+struct List* AddElement(struct List *ListElement, struct List *newElement);
+struct List* InsertElement(struct List *ListElement, struct List *newElement);
+struct List* RemoveAndDestroyElement(struct List *removeElement);
+struct List* GetFirstElement(struct List *ListElement);
+struct List* GetLastElement(struct List *ListElement);
+int GetListCount(struct List *ListElement);
 
 /* draw support */
 void ShowSplashScreen();
@@ -47,6 +57,7 @@ void Draw();
 /* helpers */
 void Init();
 void FreeAll();
+void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount);
 
 /* game logic */
 void MoveInvaders();
@@ -56,15 +67,18 @@ void RemoveDefeatedEntities();
 void DetectCollision();
 void Shot();
 
+/* global variables */
+int score = 0;
+int playerHealth = 0;
+struct winsize terminalSize;
+struct List *invaders = NULL;
+struct List *shieldObjects = NULL;
+struct Position *playerPos = NULL;
+
 int main (void)
 {
-  /* fields */
-  int _Score = 0;
-  int _Health = 3;
-  struct winsize _TerminalSize;
-
   /* get terminal size */
-  ioctl(0, TIOCGWINSZ, &_TerminalSize);
+  ioctl(0, TIOCGWINSZ, &terminalSize);
 
   /* welcome window */
   ShowSplashScreen();
@@ -104,12 +118,39 @@ void ShowSplashScreen()
 
 void Init()
 {
+  /* create invaders */
+  while ( GetListCount(invaders) < (__InvaderPerRow * __InvaderRowCount) )
+  {
+    /* allocate invader */
+    struct List * listElement = (struct List*)malloc( sizeof(struct List));
+    struct Entity *invader =  (struct Entity*)malloc( sizeof(struct Entity));
+    struct Position *position =  (struct Position*)malloc( sizeof(struct Position));
 
+    /* set properties */
+    GetNextPosition(GetLastElement(invaders)->Entity->Position, position, GetListCount(invaders));
+
+    invader->SymbolOne = 'V';
+    invader->SymbolTwo = 'W';
+    invader->SymbolSwitch = false;
+
+    /* stack, link */
+    invader->Position = position;
+    listElement->Entity = invader;
+
+    /* add to List */
+    invaders = AddElement(invaders, listElement);
+  }
+
+  /* place objects */
+
+  /* initialise player and score */
+  playerHealth = __InitialPlayerHealth;
+  score = 0;
 }
 
-struct list* AddElement(struct list *listElement, struct list *newElement)
+struct List* AddElement(struct List *ListElement, struct List *newElement)
 {
-    if (listElement == NULL)
+    if (ListElement == NULL)
     {
       newElement->Previous = NULL;
       newElement->Next = NULL;
@@ -117,18 +158,18 @@ struct list* AddElement(struct list *listElement, struct list *newElement)
     }
     else
     {
-        listElement = GetLastElement(listElement);
-        listElement->Next = newElement;
-        listElement->Next->Previous = listElement;
-        listElement->Next->Next = NULL;
+        ListElement = GetLastElement(ListElement);
+        ListElement->Next = newElement;
+        ListElement->Next->Previous = ListElement;
+        ListElement->Next->Next = NULL;
     }
 
-    return listElement;
+    return ListElement;
 }
 
-struct list* InsertElement(struct list *listElement, struct list *newElement)
+struct List* InsertElement(struct List *ListElement, struct List *newElement)
 {
-    if (listElement == NULL)
+    if (ListElement == NULL)
     {
       newElement->Previous = NULL;
       newElement->Next = NULL;
@@ -136,23 +177,23 @@ struct list* InsertElement(struct list *listElement, struct list *newElement)
     }
     else
     {
-        listElement = GetFirstElement(listElement);
-        listElement->Previous = newElement;
-        listElement->Previous->Next = listElement;
-        listElement->Previous->Previous = NULL;
+        ListElement = GetFirstElement(ListElement);
+        ListElement->Previous = newElement;
+        ListElement->Previous->Next = ListElement;
+        ListElement->Previous->Previous = NULL;
     }
 
-    return listElement;
+    return ListElement;
 }
 
-struct list* RemoveAndDestroyElement(struct list *removeElement)
+struct List* RemoveAndDestroyElement(struct List *removeElement)
 {
-    struct list *returnElement = NULL;
-  /* element in the middle of list */
+    struct List *returnElement = NULL;
+  /* element in the middle of List */
   if (removeElement->Next != NULL && removeElement->Previous != NULL)
   {
-    struct list *leftElement = removeElement->Previous;
-    struct list *rightElement = removeElement->Next;
+    struct List *leftElement = removeElement->Previous;
+    struct List *rightElement = removeElement->Next;
 
     leftElement->Next = rightElement;
     rightElement->Previous = leftElement;
@@ -167,7 +208,7 @@ struct list* RemoveAndDestroyElement(struct list *removeElement)
   /* is first element */
   else if (removeElement == GetFirstElement(removeElement))
   {
-    struct list *rightElement = removeElement->Next;
+    struct List *rightElement = removeElement->Next;
     rightElement->Previous = NULL;
 
     returnElement = rightElement;
@@ -175,34 +216,78 @@ struct list* RemoveAndDestroyElement(struct list *removeElement)
   /* is last element */
   else if (removeElement == GetLastElement(removeElement))
   {
-    struct list *leftElement = removeElement->Previous;
+    struct List *leftElement = removeElement->Previous;
     leftElement->Next = NULL;
 
     returnElement = leftElement;
   }
 
+  free(removeElement->Entity->Position);
+  free(removeElement->Entity);
   free(removeElement);
   return returnElement;
 }
 
-struct list* GetFirstElement(struct list *listElement)
+struct List* GetFirstElement(struct List *ListElement)
 {
-  if (listElement == NULL)
+  if (ListElement == NULL)
         return NULL;
-    while (listElement->Previous != NULL)
+    while (ListElement->Previous != NULL)
     {
-        listElement = listElement->Previous;
+        ListElement = ListElement->Previous;
     }
-    return listElement;
+    return ListElement;
 }
 
-struct list* GetLastElement(struct list *listElement)
+struct List* GetLastElement(struct List *ListElement)
 {
-  if (listElement == NULL)
+  if (ListElement == NULL)
         return NULL;
-    while (listElement->Next != NULL)
+    while (ListElement->Next != NULL)
     {
-        listElement = listElement->Next;
+        ListElement = ListElement->Next;
     }
-    return listElement;
+    return ListElement;
 }
+
+int GetListCount(struct List *ListElement)
+{
+  if (ListElement == NULL)
+    return 0;
+
+  ListElement = GetFirstElement(ListElement);
+
+  int count = 1;
+  while (ListElement->Next != NULL)
+  {
+    ListElement = ListElement->Next;
+    count++;
+  }
+
+  return count;
+}
+
+void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount)
+{
+  /* first invader */
+  if (lastPosition == NULL)
+  {
+    newPosition->Row = __InvaderFirstRow;
+    newPosition->Column = __InvaderFirstColumn;
+    return;
+  }  
+  /* ohters */
+  /* new row */
+  if (listCount % __InvaderPerRow == 0)
+  {
+    newPosition->Row = lastPosition->Row + __InvaderVerticalSpace;
+    newPosition->Column = __InvaderFirstColumn;
+  }
+  /* next column */
+  else
+  {
+    newPosition->Row = lastPosition->Row;
+    newPosition->Column = lastPosition->Column + __InvaderHorizontalSpace;
+  }
+}
+
