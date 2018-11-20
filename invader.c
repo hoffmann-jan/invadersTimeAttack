@@ -84,12 +84,6 @@ struct Position *playerPos = NULL;
 
 int main (void)
 {
-
-  /* fields */
-  int _Score = 0;
-  int _Health = 3;
-  struct winsize _TerminalSize;
-
   //___DEBUGVARIABLEN___
   //enable step by step loop
   int _DEBUG_MODE = 1;
@@ -104,7 +98,7 @@ int main (void)
   ShowSplashScreen();
 
   /* game initialisation */
-  //Init();
+  Init();
 
   /* game loop */
   while (true)
