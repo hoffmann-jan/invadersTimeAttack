@@ -40,11 +40,7 @@ struct Entity
   bool SymbolSwitch;
 };
 
-<<<<<<< HEAD
-struct list
-=======
 struct List
->>>>>>> f3a5783bc35ecfd230818100d24e6d18d7c00402
 {
   struct Entity *Entity;
   struct List *Next;
