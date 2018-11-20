@@ -98,7 +98,7 @@ int main (void)
   ShowSplashScreen();
 
   /* game initialisation */
-  Init();
+  //Init();
 
   /* game loop */
   while (true)
@@ -108,6 +108,8 @@ int main (void)
     if(kbhit())
     {
       _DEBUG_LAST_PRESSED_BUTTON = getchar();
+      if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER */
+      break;
     }
 
     //redraw
@@ -166,7 +168,10 @@ void Init()
     invaders = AddElement(invaders, listElement);
   }
 
-  /* place objects */
+  /* place shield objects */
+  int nineSize = (int) terminalSize.ws_col / 9;
+
+
 
   /* initialise player and score */
   playerHealth = __InitialPlayerHealth;
