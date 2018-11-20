@@ -2,8 +2,13 @@
 #include <sys/ioctl.h>
 /* add standard input / output */
 #include <stdio.h>
-/* add bool */ 
+/* add standard library for allocation*/
+#include <stdlib.h>
+/* add bool */
 #include <stdbool.h>
+
+/* need kbhit implementation */
+#include "myconio.h"
 
 /* define terminal functions */
 #define ClearTerminal() printf("\033[H\033[J")
@@ -26,7 +31,7 @@ struct Entity
   bool SymbolSwitch;
 };
 
-struct list 
+struct list
 {
   struct Entity *Entity;
   struct list *Next;
@@ -37,6 +42,7 @@ void ShowSplashScreen();
 void Draw();
 
 void Init();
+void GetInputCommand();
 
 void MoveInvaders();
 void MoveProjectiles();
@@ -54,6 +60,13 @@ int main (void)
   int _Health = 3;
   struct winsize _TerminalSize;
 
+  //___DEBUGVARIABLEN___
+  //enable step by step loop
+  int _DEBUG_MODE = 1;
+  int _DEBUG_LAST_PRESSED_BUTTON = 0;
+
+  //___ENDDEBUG___
+
   /* get terminal size */
   ioctl(0, TIOCGWINSZ, &_TerminalSize);
 
@@ -66,16 +79,26 @@ int main (void)
   /* game loop */
   while (true)
   {
-    printf("loop\n");
-    break;
+
+    //PlayerInput and DataUpdate
+    if(kbhit())
+    {
+      _DEBUG_LAST_PRESSED_BUTTON = getchar();
+    }
+
+    //redraw
+    ClearTerminal();
+    printf("loop, last key: %d\n",_DEBUG_LAST_PRESSED_BUTTON);
+
   }
   /* end game loop */
-  
+
   return 0;
 }
 
 void ShowSplashScreen()
 {
+  ClearTerminal();
   printf("INVADERS\n");
   printf("INVADERS\n");
   printf("INVADERS\n");
@@ -93,7 +116,9 @@ void ShowSplashScreen()
   GoToTerminalPosition(0, 0);
 }
 
+
 void Init()
 {
+
 
 }
