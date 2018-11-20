@@ -129,13 +129,13 @@ int main (void)
 void ShowSplashScreen()
 {
   ClearTerminal();
-  printf("INVADERS\n");
-  printf("INVADERS\n");
-  printf("INVADERS\n");
-  printf("INVADERS\n");
-  printf("INVADERS\n");
-  printf("INVADERS\n");
-  printf("INVADERS\n");
+  printf("    _____   ___    _____    ____  __________  _____\n");
+  printf("   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/\n");
+  printf("   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ \n");
+  printf(" _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / \n");
+  printf("/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  \n");
+  printf("\n");
+  printf("\n");
 
   printf("\npress enter to start .. \n");
   getchar();
