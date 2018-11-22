@@ -1,5 +1,5 @@
-prog.bin: mkDirs obj/invader.o obj/myconio.o obj/List.o obj/Entity.o obj/Position.o
-	cc -o bin/prog.bin obj/invader.o obj/myconio.o obj/List.o obj/Entity.o obj/Position.o
+prog.bin: mkDirs obj/invader.o obj/myconio.o obj/List.o 
+	cc -o bin/prog.bin obj/invader.o obj/myconio.o obj/List.o
 
 obj/invader.o: invader.c
 	cc -c invader.c -o obj/invader.o
