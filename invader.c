@@ -10,11 +10,11 @@
 #include <stdlib.h>
 /* thread sleep */
 #include <unistd.h>
-
-/* need kbhit implementation */
-#include "myconio.h"
+/* time */
+#include <time.h>
 
 /**/
+#include "myconio.h"
 #include "List.h"
 #include "Entity.h"
 #include "Position.h"
@@ -38,6 +38,11 @@
 #define __ShieldObjectAppearenceLowHealth '~'
 #define __PlayerAppearence 'M'
 
+/* debugvariablen */
+//enable step by step loop
+int _DEBUG_MODE = 1;
+int _DEBUG_LAST_PRESSED_BUTTON = 0;
+int _DEBUG_FRAMECOUNTER = 0;
 
 /* draw support */
 void ShowSplashScreen();
@@ -69,13 +74,6 @@ struct Position *playerPosition = NULL;
 
 int main (void)
 {
-  //___DEBUGVARIABLEN___
-  //enable step by step loop
-  int _DEBUG_MODE = 1;
-  int _DEBUG_LAST_PRESSED_BUTTON = 0;
-
-  //___ENDDEBUG___
-
   /* get terminal size */
   ioctl(0, TIOCGWINSZ, &terminalSize);
 
@@ -85,10 +83,15 @@ int main (void)
   /* game initialisation */
   Init();
   Draw(true);
-
+  
+  time_t secondStart;
+  secondStart = time(NULL);
+  
+  
   /* game loop */
   while (true)
   {
+    _DEBUG_FRAMECOUNTER++;
     //PlayerInput and DataUpdate
     if(kbhit())
     {
@@ -102,8 +105,9 @@ int main (void)
     Draw(false);
 
     /* 500 = 0,5s */
-    usleep(500);
-    printf("%d", _DEBUG_LAST_PRESSED_BUTTON);
+    /* 30 = 0,033s => 30FPS*/
+    //usleep(33);  
+    printf("Last Button:%d - Frames:%d", _DEBUG_LAST_PRESSED_BUTTON, _DEBUG_FRAMECOUNTER);
   }
   /* end game loop */
 
