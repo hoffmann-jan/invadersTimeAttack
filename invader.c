@@ -105,7 +105,8 @@ int main (void)
     Draw();
 
     /* 500 = 0,5s */
-    usleep(10000);
+    if (usleep(10000) < 0)
+      printf("ERROR: THREAD DOES NOT SLEEP.");
     printf("%d", _DEBUG_LAST_PRESSED_BUTTON);
     
     if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
