@@ -24,7 +24,13 @@
 #define __InvaderVerticalSpace 2
 #define __InvaderFirstColumn 0
 #define __InvaderFirstRow 0
+#define __InvaderAppearence 'V'
+#define __InvaderAppearenceTwo 'W'
 #define __ShieldObjectHealth 5
+#define __ShieldObjectAppearence '#'
+#define __ShieldObjectAppearenceLowHealth '~'
+#define __PlayerAppearence 'M'
+
 
 struct Position
 {
@@ -38,6 +44,8 @@ struct Entity
   char SymbolOne;
   char SymbolTwo;
   bool SymbolSwitch;
+  /* use in shield object */
+  int Health;
 };
 
 struct List
@@ -49,6 +57,7 @@ struct List
 
 /* List functions */
 struct List* AddElement(struct List *ListElement, struct List *newElement);
+struct List* AllocFullListElement();
 struct List* InsertElement(struct List *ListElement, struct List *newElement);
 struct List* RemoveAndDestroyElement(struct List *removeElement);
 struct List* GetFirstElement(struct List *ListElement);
@@ -64,6 +73,7 @@ void Init();
 
 void FreeAll();
 void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount);
+void BuildShields();
 
 
 /* game logic */
@@ -80,7 +90,7 @@ int playerHealth = 0;
 struct winsize terminalSize;
 struct List *invaders = NULL;
 struct List *shieldObjects = NULL;
-struct Position *playerPos = NULL;
+struct Position *playerPosition = NULL;
 
 int main (void)
 {
@@ -149,40 +159,37 @@ void Init()
   while ( GetListCount(invaders) < (__InvaderPerRow * __InvaderRowCount) )
   {
     /* allocate invader */
-    struct List * listElement = (struct List*)malloc( sizeof(struct List));
-    struct Entity *invader =  (struct Entity*)malloc( sizeof(struct Entity));
-    struct Position *position =  (struct Position*)malloc( sizeof(struct Position));
+    struct List * listElement = AllocFullListElement();
 
     /* set properties */
     if (invaders == NULL)
     {
-      GetNextPosition(NULL, position, GetListCount(invaders));
+      GetNextPosition(NULL, listElement->Entity->Position, GetListCount(invaders));
     }
     else
     {
-      GetNextPosition(GetLastElement(invaders)->Entity->Position, position, GetListCount(invaders));
+      GetNextPosition(GetLastElement(invaders)->Entity->Position, listElement->Entity->Position, GetListCount(invaders));
     }
 
-    invader->SymbolOne = 'V';
-    invader->SymbolTwo = 'W';
-    invader->SymbolSwitch = false;
-
-    /* stack, link */
-    invader->Position = position;
-    listElement->Entity = invader;
+    listElement->Entity->SymbolOne = __InvaderAppearence;
+    listElement->Entity->SymbolTwo = __InvaderAppearenceTwo;
+    listElement->Entity->SymbolSwitch = false;
 
     /* add to List */
     invaders = AddElement(invaders, listElement);
   }
 
   /* place shield objects */
-  //int nineSize = (int) terminalSize.ws_col / 9;
-
-
+  BuildShields();
 
   /* initialise player and score */
   playerHealth = __InitialPlayerHealth;
   score = 0;
+  if (playerPosition == NULL)
+    playerPosition = (struct Position*) malloc(sizeof(struct Position));
+
+  playerPosition->Column = (int) terminalSize.ws_col / 2;
+  playerPosition->Row = ((int) (terminalSize.ws_row / 20)) * 20;
 }
 
 struct List* AddElement(struct List *ListElement, struct List *newElement)
@@ -202,6 +209,19 @@ struct List* AddElement(struct List *ListElement, struct List *newElement)
     }
 
     return ListElement;
+}
+
+struct List* AllocFullListElement()
+{
+  struct List * listElement = (struct List*)malloc( sizeof(struct List));
+  struct Entity *entity =  (struct Entity*)malloc( sizeof(struct Entity));
+  struct Position *position =  (struct Position*)malloc( sizeof(struct Position));
+
+  /* link */
+  listElement->Entity = entity;
+  listElement->Entity->Position = position;
+
+  return listElement;
 }
 
 struct List* InsertElement(struct List *ListElement, struct List *newElement)
@@ -325,5 +345,36 @@ void GetNextPosition(struct Position *lastPosition, struct Position *newPosition
   {
     newPosition->Row = lastPosition->Row;
     newPosition->Column = lastPosition->Column + __InvaderHorizontalSpace;
+  }
+}
+
+void BuildShields()
+{
+  int ninth = (int) terminalSize.ws_col / 9;
+  /* set row for the shields */
+  int shildRow = ((int) terminalSize.ws_row / 20) * 15;
+
+  int cursor = 0;
+  while (cursor < terminalSize.ws_col)
+  {
+    GoToTerminalPosition(cursor, shildRow);
+
+    if ( (ninth < cursor && cursor < ninth * 3)
+      || (ninth * 3 < cursor && cursor < ninth * 5)
+      || (ninth * 5 < cursor && cursor < ninth * 8)
+      || (ninth * 7 < cursor && cursor < ninth * 9))
+      {
+        struct List *shield = AllocFullListElement();
+        shield->Entity->Health = __ShieldObjectHealth;
+        shield->Entity->Position->Column = cursor;
+        shield->Entity->Position->Row = shildRow;
+        shield->Entity->SymbolOne = __ShieldObjectAppearence;
+        shield->Entity->SymbolTwo = __ShieldObjectAppearenceLowHealth;
+        shield->Entity->SymbolSwitch = true;
+
+        shieldObjects = AddElement(shieldObjects ,shield);
+      }
+
+    cursor++;
   }
 }
