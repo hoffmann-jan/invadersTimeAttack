@@ -21,16 +21,17 @@
 
 /* define terminal functions */
 #define ClearTerminal() printf("\033[H\033[J")
-#define GoToTerminalPosition(x,y) printf("\033[%d;%dH", (x), (y))
+#define GoToTerminalPosition(row, col) printf("\033[%d;%dH", (row), (col))
 /* define Invader dimension */
 #define __InvaderPerRow 11
 #define __InvaderRowCount 5
 /* define inital values */
 #define __InitialPlayerHealth 3
-#define __InvaderHorizontalSpace 4
+#define __InvaderHorizontalSpace 5
 #define __InvaderVerticalSpace 2
-#define __InvaderFirstColumn 0
-#define __InvaderFirstRow 0
+/* first koordinates in terminal 1, 1 */
+#define __InvaderFirstColumn 1
+#define __InvaderFirstRow 1
 #define __InvaderAppearence 'V'
 #define __InvaderAppearenceTwo 'W'
 #define __ShieldObjectHealth 5
@@ -41,7 +42,7 @@
 
 /* draw support */
 void ShowSplashScreen();
-void Draw(bool init);
+void Draw();
 
 /* helpers */
 void Init();
@@ -49,6 +50,7 @@ void Init();
 void FreeAll();
 void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount);
 void BuildShields();
+void PrintChar(struct List *object);
 
 
 /* game logic */
@@ -84,7 +86,10 @@ int main (void)
 
   /* game initialisation */
   Init();
-  Draw(true);
+
+  ClearTerminal();
+  Draw();
+  usleep(1000);
 
   /* game loop */
   while (true)
@@ -93,17 +98,21 @@ int main (void)
     if(kbhit())
     {
       _DEBUG_LAST_PRESSED_BUTTON = getchar();
-      if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER */
-      break;
     }
 
     /* redraw */
     ClearTerminal();
-    Draw(false);
+    Draw();
 
     /* 500 = 0,5s */
-    usleep(500);
+    usleep(10000);
     printf("%d", _DEBUG_LAST_PRESSED_BUTTON);
+    
+    if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
+    {
+      ClearTerminal();
+      break;
+    }
   }
   /* end game loop */
 
@@ -134,7 +143,7 @@ void ShowSplashScreen()
 void Init()
 {
   /* create invaders */
-  while ( GetListCount(invaders) < (__InvaderPerRow * __InvaderRowCount) )
+  while ( GetListCount(invaders) <= (__InvaderPerRow * __InvaderRowCount) )
   {
     /* allocate invader */
     struct List * listElement = AllocFullListElement();
@@ -179,6 +188,7 @@ void GetNextPosition(struct Position *lastPosition, struct Position *newPosition
     newPosition->Column = __InvaderFirstColumn;
     return;
   }
+
   /* ohters */
   /* new row */
   if (listCount % __InvaderPerRow == 0)
@@ -224,30 +234,69 @@ void BuildShields()
   }
 }
 
-void Draw(bool init)
+void Draw()
 {
-  ClearTerminal();
-
+  /* draw invaders */
   struct List *invaderList = GetFirstElement(invaders);
-  while (invaderList->Next != NULL)
-  {
-    /* move */
-    if (!init)
-    {
-      //MoveInvaders();
-    }
-    /* draw */
-    GoToTerminalPosition(invaderList->Entity->Position->Column, invaderList->Entity->Position->Row);
-    if (invaderList->Entity->SymbolSwitch)
-      printf("%c", invaderList->Entity->SymbolOne);
-    else
-      printf("%c", invaderList->Entity->SymbolTwo);
+  bool continueOperation = true;
 
-    invaderList = invaderList->Next;
+  while (continueOperation)
+  {
+    if (invaderList == NULL)
+      break;
+
+    /* draw */
+    PrintChar(invaderList);
+
+    if (invaderList->Next == NULL)
+      continueOperation = false;
+    else
+      invaderList = invaderList->Next;
   }
 
-  /* */
-  /* */
-  /* */
-  /* */
+  /* draw shields */
+  struct List *shields = GetFirstElement(shieldObjects);
+  continueOperation = true;
+  while (continueOperation)
+  {
+    if (shields == NULL)
+      break;
+
+    PrintChar(shields);
+
+    if (shields->Next == NULL)
+      continueOperation = false;
+    else
+      shields = shields->Next;
+  }
+
+  /* draw player */
+  GoToTerminalPosition(playerPosition->Row, playerPosition->Column);
+  printf("%c", __PlayerAppearence);
+
+  /*draw spacer */
+  int i = 1;
+  while(i <= terminalSize.ws_col)
+  {
+    GoToTerminalPosition(terminalSize.ws_row - 1, i);
+    printf("_");
+    i++;
+  }
+
+  /* draw score */
+  GoToTerminalPosition(terminalSize.ws_row, 1);
+  printf("<score: %d>", score);
+
+  /* draw health */
+  GoToTerminalPosition(terminalSize.ws_row, (int) terminalSize.ws_col / 2);
+  printf("<health: %d>", playerHealth);
+}
+
+void PrintChar(struct List *object)
+{
+  GoToTerminalPosition(object->Entity->Position->Row, object->Entity->Position->Column);
+  if (object->Entity->SymbolSwitch)
+    printf("%c", object->Entity->SymbolOne);
+  else
+    printf("%c", object->Entity->SymbolTwo);
 }
