@@ -8,6 +8,8 @@
 #include <stdbool.h>
 /* malloc etc. */
 #include <stdlib.h>
+/* thread sleep */
+#include <unistd.h>
 
 /* need kbhit implementation */
 #include "myconio.h"
@@ -39,7 +41,7 @@
 
 /* draw support */
 void ShowSplashScreen();
-void Draw();
+void Draw(bool init);
 
 /* helpers */
 void Init();
@@ -82,11 +84,11 @@ int main (void)
 
   /* game initialisation */
   Init();
+  Draw(true);
 
   /* game loop */
   while (true)
   {
-
     //PlayerInput and DataUpdate
     if(kbhit())
     {
@@ -95,10 +97,13 @@ int main (void)
       break;
     }
 
-    //redraw
+    /* redraw */
     ClearTerminal();
-    printf("loop, last key: %d\n",_DEBUG_LAST_PRESSED_BUTTON);
+    Draw(false);
 
+    /* 500 = 0,5s */
+    usleep(500);
+    printf("%d", _DEBUG_LAST_PRESSED_BUTTON);
   }
   /* end game loop */
 
@@ -217,4 +222,32 @@ void BuildShields()
 
     cursor++;
   }
+}
+
+void Draw(bool init)
+{
+  ClearTerminal();
+
+  struct List *invaderList = GetFirstElement(invaders);
+  while (invaderList->Next != NULL)
+  {
+    /* move */
+    if (!init)
+    {
+      //MoveInvaders();
+    }
+    /* draw */
+    GoToTerminalPosition(invaderList->Entity->Position->Column, invaderList->Entity->Position->Row);
+    if (invaderList->Entity->SymbolSwitch)
+      printf("%c", invaderList->Entity->SymbolOne);
+    else
+      printf("%c", invaderList->Entity->SymbolTwo);
+
+    invaderList = invaderList->Next;
+  }
+
+  /* */
+  /* */
+  /* */
+  /* */
 }
