@@ -84,13 +84,10 @@ int main (void)
 
   /* game initialisation */
   Init();
-  Draw(true);
   
   time_t secondStart;
   secondStart = time(NULL);
   
-  
-
   ClearTerminal();
   Draw();
   usleep(1000);
@@ -128,21 +125,28 @@ int main (void)
 void ShowSplashScreen()
 {
   ClearTerminal();
-  printf("    _____   ___    _____    ____  __________  _____\n");
-  printf("   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/\n");
-  printf("   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ \n");
-  printf(" _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / \n");
-  printf("/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  \n");
-  printf("\n");
-  printf("\n");
+  int fifth = (int) terminalSize.ws_row / 5;
+  int startRow = fifth * 2;
+  int startColumn = ((int) terminalSize.ws_col / 2) - 25;
+  GoToTerminalPosition(startRow, startColumn);
+  printf("    _____   ___    _____    ____  __________  _____");
+  GoToTerminalPosition(startRow + 1, startColumn);
+  printf("   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/");
+  GoToTerminalPosition(startRow + 2, startColumn);
+  printf("   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ ");
+  GoToTerminalPosition(startRow + 3, startColumn);
+  printf(" _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
+  GoToTerminalPosition(startRow + 4, startColumn);
+  printf("/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  ");
 
-  printf("\npress enter to start .. \n");
+  GoToTerminalPosition(startRow * 4, startColumn + 10);
+  printf("press enter to start .. ");
   getchar();
 
   /* clear screen */
   ClearTerminal();
   /* move cursor to top left */
-  GoToTerminalPosition(0, 0);
+  GoToTerminalPosition(1, 1);
 }
 
 
