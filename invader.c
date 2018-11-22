@@ -98,7 +98,7 @@ int main (void)
   ShowSplashScreen();
 
   /* game initialisation */
-  //Init();
+  Init();
 
   /* game loop */
   while (true)
@@ -154,7 +154,14 @@ void Init()
     struct Position *position =  (struct Position*)malloc( sizeof(struct Position));
 
     /* set properties */
-    GetNextPosition(GetLastElement(invaders)->Entity->Position, position, GetListCount(invaders));
+    if (invaders == NULL)
+    {
+      GetNextPosition(NULL, position, GetListCount(invaders));
+    }
+    else
+    {
+      GetNextPosition(GetLastElement(invaders)->Entity->Position, position, GetListCount(invaders));
+    }
 
     invader->SymbolOne = 'V';
     invader->SymbolTwo = 'W';
@@ -169,7 +176,7 @@ void Init()
   }
 
   /* place shield objects */
-  int nineSize = (int) terminalSize.ws_col / 9;
+  //int nineSize = (int) terminalSize.ws_col / 9;
 
 
 
