@@ -19,9 +19,16 @@
 #include "Entity.h"
 #include "Position.h"
 
+/* define system call changes */
+// NOCH BUGGY!
+//#define AvoidReturn() system ("/bin/stty raw")
+//#define ResetAvoidReturn() system("/bin/stty cooked")
+
 /* define terminal functions */
 #define ClearTerminal() printf("\033[H\033[J")
 #define GoToTerminalPosition(row, col) printf("\033[%d;%dH", (row), (col))
+#define HideCursor() printf("\e[?25l") 
+#define ShowCursor() printf("\e[?25h")
 /* define Invader dimension */
 #define __InvaderPerRow 11
 #define __InvaderRowCount 5
@@ -86,14 +93,12 @@ int main (void)
   Init();
   Draw(true);
   
-  time_t secondStart;
-  secondStart = time(NULL);
+  time_t begin;
+  begin = time(NULL);
   
-  
-
   ClearTerminal();
   Draw();
-  usleep(1000);
+  //usleep(1000);
 
   /* game loop */
   while (true)
@@ -107,11 +112,10 @@ int main (void)
 
     /* redraw */
     ClearTerminal();
-    Draw();
-
-    /* 500 = 0,5s */
-    usleep(10000);
-    printf("%d", _DEBUG_LAST_PRESSED_BUTTON);
+    // Draw();
+    /* 1000000 = 1s */
+    usleep(1000000);
+    printf("%d - %ld - Frames:%d", _DEBUG_LAST_PRESSED_BUTTON, begin - time(NULL), _DEBUG_FRAMECOUNTER);
     
     if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
     {
@@ -120,7 +124,7 @@ int main (void)
     }
   }
   /* end game loop */
-
+  
   return 0;
 }
 
@@ -136,6 +140,7 @@ void ShowSplashScreen()
   printf("\n");
 
   printf("\npress enter to start .. \n");
+  HideCursor();
   getchar();
 
   /* clear screen */
