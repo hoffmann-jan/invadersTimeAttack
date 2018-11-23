@@ -77,8 +77,10 @@ void MovePlayer(int direction);
 void RemoveDefeatedEntities();
 void DetectCollision();
 void Shot();
+void ValidateInvaderDirection();
 
 /* global variables */
+bool invaderDirection = false;
 int score = 0;
 int playerHealth = 0;
 struct winsize terminalSize;
@@ -333,13 +335,24 @@ void MoveInvaders()
 {
   struct List *invaderList = GetFirstElement(invaders);
 
+  /* check direction */
+  ValidateInvaderDirection();   
+  
   while (invaderList != NULL)
   {
     /* delete od position */
     DeleteChar(invaderList->Entity->Position);
 
     /* move */
-    invaderList->Entity->Position->Column = invaderList->Entity->Position->Column + __MoveHorizontalStep;
+    if (!invaderDirection) /* true, left; flase, right */
+    {
+      invaderList->Entity->Position->Column = invaderList->Entity->Position->Column + __MoveHorizontalStep;
+    }
+    else
+    {
+      invaderList->Entity->Position->Column = invaderList->Entity->Position->Column - __MoveHorizontalStep;
+    }
+
 
     /* draw */
     PrintChar(invaderList);
@@ -371,4 +384,34 @@ void DrawPlayer()
 {
   GoToTerminalPosition(playerPosition->Row, playerPosition->Column);
   printf("%c", __PlayerAppearence);
+}
+
+void ValidateInvaderDirection()
+{
+  struct List *list = GetFirstElement(invaders);
+
+  if (list == NULL)
+    return;
+
+  int min = list->Entity->Position->Column;
+  int max = list->Entity->Position->Column;
+
+  int i = 1;
+  while (list != NULL)
+  {
+    if (list->Entity->Position->Column < min)
+      min = list->Entity->Position->Column;
+
+    if (list->Entity->Position->Column > max)
+      max = list->Entity->Position->Column;
+
+    list = list->Next;    
+    if (i++ > __InvaderPerRow)
+      break;
+  }
+
+  if (min == 1 && invaderDirection == true)
+    invaderDirection = !invaderDirection;
+  if (max == terminalSize.ws_col && invaderDirection == false)
+    invaderDirection = !invaderDirection;
 }
