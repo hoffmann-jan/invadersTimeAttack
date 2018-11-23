@@ -88,6 +88,7 @@ int main (void)
 
   /* welcome window */
   ShowSplashScreen();
+  HideCursor();
 
   /* game initialisation */
   Init();
@@ -97,11 +98,13 @@ int main (void)
   
   ClearTerminal();
   Draw();
-  //usleep(1000);
 
   /* game loop */
   while (true)
   {
+    /* 1000000 = 1s */
+    //usleep(1000000 / 30);
+
     _DEBUG_FRAMECOUNTER++;
     //PlayerInput and DataUpdate
     if(kbhit())
@@ -110,11 +113,9 @@ int main (void)
     }
 
     /* redraw */
-    ClearTerminal();
-    // Draw();
-    /* 1000000 = 1s */
-    usleep(1000000);
-    printf("%d - %ld - Frames:%d", _DEBUG_LAST_PRESSED_BUTTON, begin - time(NULL), _DEBUG_FRAMECOUNTER);
+    //ClearTerminal();
+    //Draw();
+    //printf("%d - %ld - Frames:%d", _DEBUG_LAST_PRESSED_BUTTON, begin - time(NULL), _DEBUG_FRAMECOUNTER);
     
     if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
     {
@@ -124,6 +125,7 @@ int main (void)
   }
   /* end game loop */
   
+  ShowCursor();
   return 0;
 }
 
@@ -222,22 +224,20 @@ void BuildShields()
 {
   int ninth = (int) terminalSize.ws_col / 9;
   /* set row for the shields */
-  int shildRow = ((int) terminalSize.ws_row / 20) * 15;
+  int shieldRow = ((int) terminalSize.ws_row / 20) * 15;
 
-  int cursor = 0;
+  int cursor = 1;
   while (cursor < terminalSize.ws_col)
   {
-    GoToTerminalPosition(cursor, shildRow);
-
-    if ( (ninth < cursor && cursor < ninth * 3)
-      || (ninth * 3 < cursor && cursor < ninth * 5)
-      || (ninth * 5 < cursor && cursor < ninth * 8)
-      || (ninth * 7 < cursor && cursor < ninth * 9))
+    if ( (ninth < cursor && cursor <= ninth * 2)
+      || (ninth * 3 < cursor && cursor <= ninth * 4)
+      || (ninth * 5 < cursor && cursor <= ninth * 6)
+      || (ninth * 7 < cursor && cursor <= ninth * 8))
       {
         struct List *shield = AllocFullListElement();
         shield->Entity->Health = __ShieldObjectHealth;
         shield->Entity->Position->Column = cursor;
-        shield->Entity->Position->Row = shildRow;
+        shield->Entity->Position->Row = shieldRow;
         shield->Entity->SymbolOne = __ShieldObjectAppearence;
         shield->Entity->SymbolTwo = __ShieldObjectAppearenceLowHealth;
         shield->Entity->SymbolSwitch = true;
@@ -289,21 +289,21 @@ void Draw()
   GoToTerminalPosition(playerPosition->Row, playerPosition->Column);
   printf("%c", __PlayerAppearence);
 
-  /*draw spacer */
+  /* draw spacer */
   int i = 1;
   while(i <= terminalSize.ws_col)
   {
-    GoToTerminalPosition(terminalSize.ws_row - 1, i);
+    GoToTerminalPosition(terminalSize.ws_row - 2, i);
     printf("_");
     i++;
   }
 
   /* draw score */
-  GoToTerminalPosition(terminalSize.ws_row, 1);
+  GoToTerminalPosition(terminalSize.ws_row - 1, 1);
   printf("<score: %d>", score);
 
   /* draw health */
-  GoToTerminalPosition(terminalSize.ws_row, (int) terminalSize.ws_col / 2);
+  GoToTerminalPosition(terminalSize.ws_row - 1, (int) terminalSize.ws_col / 2);
   printf("<health: %d>", playerHealth);
 }
 
