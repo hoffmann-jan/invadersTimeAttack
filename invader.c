@@ -45,6 +45,7 @@
 #define __ShieldObjectAppearence '#'
 #define __ShieldObjectAppearenceLowHealth '~'
 #define __PlayerAppearence 'M'
+#define __SpacerBar '_'
 /* moving support */
 #define __MoveHorizontalStep 2
 
@@ -66,12 +67,13 @@ void GetNextPosition(struct Position *lastPosition, struct Position *newPosition
 void BuildShields();
 void PrintChar(struct List *object);
 void DeleteChar(struct Position * position);
+void DrawPlayer();
 
 
 /* game logic */
 void MoveInvaders();
 void MoveProjectiles();
-void MovePlayer();
+void MovePlayer(int direction);
 void RemoveDefeatedEntities();
 void DetectCollision();
 void Shot();
@@ -113,6 +115,7 @@ int main (void)
     if(kbhit())
     {
       _DEBUG_LAST_PRESSED_BUTTON = getchar();
+      MovePlayer(_DEBUG_LAST_PRESSED_BUTTON);
     }
 
     /* redraw */
@@ -291,15 +294,14 @@ void Draw()
   }
 
   /* draw player */
-  GoToTerminalPosition(playerPosition->Row, playerPosition->Column);
-  printf("%c", __PlayerAppearence);
+  DrawPlayer();
 
   /* draw spacer */
   int i = 1;
   while(i <= terminalSize.ws_col)
   {
     GoToTerminalPosition(terminalSize.ws_row - 2, i);
-    printf("_");
+    printf("%c", __SpacerBar);
     i++;
   }
 
@@ -345,4 +347,28 @@ void MoveInvaders()
     /* next */
     invaderList = invaderList->Next;
   }
+}
+
+void MovePlayer(int direction)
+{
+  if (direction == 67 || direction == 68)
+  {
+    DeleteChar(playerPosition);
+    switch (direction)
+    {
+      case 68: /* left */
+        playerPosition->Column = playerPosition->Column - 1;
+        break;
+      case 67: /* right */
+        playerPosition->Column = playerPosition->Column + 1;
+        break;
+    }
+    DrawPlayer();
+  }  
+}
+
+void DrawPlayer()
+{
+  GoToTerminalPosition(playerPosition->Row, playerPosition->Column);
+  printf("%c", __PlayerAppearence);
 }
