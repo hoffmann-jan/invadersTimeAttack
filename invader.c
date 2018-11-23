@@ -45,6 +45,8 @@
 #define __ShieldObjectAppearence '#'
 #define __ShieldObjectAppearenceLowHealth '~'
 #define __PlayerAppearence 'M'
+/* moving support */
+#define __MoveHorizontalStep 2
 
 /* debugvariablen */
 //enable step by step loop
@@ -63,6 +65,7 @@ void FreeAll();
 void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount);
 void BuildShields();
 void PrintChar(struct List *object);
+void DeleteChar(struct Position * position);
 
 
 /* game logic */
@@ -103,7 +106,7 @@ int main (void)
   while (true)
   {
     /* 1000000 = 1s */
-    //usleep(1000000 / 30);
+    usleep(1000000 / 30);
 
     _DEBUG_FRAMECOUNTER++;
     //PlayerInput and DataUpdate
@@ -116,6 +119,8 @@ int main (void)
     //ClearTerminal();
     //Draw();
     //printf("%d - %ld - Frames:%d", _DEBUG_LAST_PRESSED_BUTTON, begin - time(NULL), _DEBUG_FRAMECOUNTER);
+    if (_DEBUG_FRAMECOUNTER % 30 == 0)
+      MoveInvaders();
     
     if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
     {
@@ -160,7 +165,7 @@ void ShowSplashScreen()
 void Init()
 {
   /* create invaders */
-  while ( GetListCount(invaders) <= (__InvaderPerRow * __InvaderRowCount) )
+  while ( GetListCount(invaders) < (__InvaderPerRow * __InvaderRowCount) )
   {
     /* allocate invader */
     struct List * listElement = AllocFullListElement();
@@ -314,4 +319,30 @@ void PrintChar(struct List *object)
     printf("%c", object->Entity->SymbolOne);
   else
     printf("%c", object->Entity->SymbolTwo);
+}
+
+void DeleteChar(struct Position * position)
+{
+  GoToTerminalPosition(position->Row, position->Column);
+  printf(" ");
+}
+
+void MoveInvaders()
+{
+  struct List *invaderList = GetFirstElement(invaders);
+
+  while (invaderList != NULL)
+  {
+    /* delete od position */
+    DeleteChar(invaderList->Entity->Position);
+
+    /* move */
+    invaderList->Entity->Position->Column = invaderList->Entity->Position->Column + __MoveHorizontalStep;
+
+    /* draw */
+    PrintChar(invaderList);
+
+    /* next */
+    invaderList = invaderList->Next;
+  }
 }
