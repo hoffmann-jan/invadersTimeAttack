@@ -47,6 +47,7 @@
 #define __ShieldObjectAppearence '#'
 #define __ShieldObjectAppearenceLowHealth '~'
 #define __PlayerAppearence 'M'
+#define __ProjectileAppearence '|'
 #define __SpacerBar '_'
 /* moving support */
 #define __MoveHorizontalStep 2
@@ -55,7 +56,7 @@
 /* debugvariablen */
 //enable step by step loop
 int _DEBUG_MODE = 1;
-int _DEBUG_LAST_PRESSED_BUTTON = 0;
+int _PRESSED_BUTTON = 0;
 int _DEBUG_FRAMECOUNTER = 0;
 
 /* draw support */
@@ -79,7 +80,7 @@ void MoveProjectiles();
 void MovePlayer(int direction);
 void RemoveDefeatedEntities();
 void DetectCollision();
-void Shot();
+void Shoot();
 void ValidateInvaderDirection();
 
 /* global variables */
@@ -91,11 +92,11 @@ int playerHealth = 0;
 struct winsize terminalSize;
 struct List *invaders = NULL;
 struct List *shieldObjects = NULL;
+struct List *projectiles = NULL;
 struct Position *playerPosition = NULL;
 
 int main (void)
 {
-
   /* get terminal size */
   ioctl(0, TIOCGWINSZ, &terminalSize);
 
@@ -124,15 +125,17 @@ int main (void)
     if(kbhit())
     {
       printf(ANSI_Color_Reset);
-      _DEBUG_LAST_PRESSED_BUTTON = getchar();
-      MovePlayer(_DEBUG_LAST_PRESSED_BUTTON);
+      _PRESSED_BUTTON = getchar();
+      MovePlayer(_PRESSED_BUTTON);
+      if (_PRESSED_BUTTON == 32)
+        Shoot();
       printf(ANSI_Color_Black);
     }
 
     /* redraw */
     //ClearTerminal();
     //Draw();
-    //printf("%d - %ld - Frames:%d", _DEBUG_LAST_PRESSED_BUTTON, begin - time(NULL), _DEBUG_FRAMECOUNTER);
+    //printf("%d - %ld - Frames:%d", _PRESSED_BUTTON, begin - time(NULL), _DEBUG_FRAMECOUNTER);
     if (bounceCounter % 4 == 0)
     {
       invaderMoveForwart = true;
@@ -145,8 +148,15 @@ int main (void)
       MoveInvaders();
       printf(ANSI_Color_Black);
     }
+
+    if (_DEBUG_FRAMECOUNTER % (__FramesPerSecond / 3) == 0)
+    {
+      printf(ANSI_Color_Reset);
+      MoveProjectiles();
+      printf(ANSI_Color_Black);
+    }
     
-    if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
+    if (_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
     {
       ClearTerminal();
       break;
@@ -315,6 +325,15 @@ void Draw()
       shields = shields->Next;
   }
 
+  /* draw projectiles */
+  struct List *projectileList = GetFirstElement(projectiles);
+  while (projectileList != NULL)
+  {
+    PrintChar(projectileList);
+    projectileList = projectileList->Next;
+  }
+
+
   /* draw player */
   DrawPlayer();
 
@@ -364,10 +383,10 @@ void MoveInvaders()
     DeleteChar(invaderList->Entity->Position);
 
     /* move */
-
     if (invaderMoveForwart)
     {
       invaderList->Entity->Position->Row++;
+      invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
     }
     else
     {
@@ -447,5 +466,38 @@ void ValidateInvaderDirection()
   {
     invaderDirection = !invaderDirection;
     bounceCounter++;
+  }
+}
+
+void Shoot()
+{
+  struct List * projectile = AllocFullListElement();
+
+  projectile->Entity->Position->Column = playerPosition->Column;
+  projectile->Entity->Position->Row = playerPosition->Row - 1;
+  projectile->Entity->SymbolOne = __ProjectileAppearence;
+  projectile->Entity->SymbolTwo = __ProjectileAppearence;
+  projectile->Entity->SymbolSwitch = true;
+  PrintChar(projectile);
+
+  projectiles = AddElement(projectiles, projectile);
+}
+
+void MoveProjectiles()
+{
+  struct List *projectileList = GetFirstElement(projectiles);
+  while (projectileList != NULL)
+  {
+    DeleteChar(projectileList->Entity->Position);
+    if (projectileList->Entity->Position->Row <= 1)
+    {
+      projectileList = (struct List *)RemoveAndDestroyElement(projectileList);
+    }
+    else
+    {
+      projectileList->Entity->Position->Row--;
+      PrintChar(projectileList);
+      projectileList = projectileList->Next;
+    }
   }
 }
