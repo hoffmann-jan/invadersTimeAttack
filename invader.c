@@ -29,6 +29,8 @@
 #define GoToTerminalPosition(row, col) printf("\033[%d;%dH", (row), (col))
 #define HideCursor() printf("\e[?25l") 
 #define ShowCursor() printf("\e[?25h")
+#define ANSI_Color_Reset "\x1b[0m"
+#define ANSI_Color_Black "\x1b[30m"
 /* define Invader dimension */
 #define __InvaderPerRow 11
 #define __InvaderRowCount 5
@@ -109,6 +111,7 @@ int main (void)
   
   ClearTerminal();
   Draw();
+  printf(ANSI_Color_Black);
 
   /* game loop */
   while (true)
@@ -120,8 +123,10 @@ int main (void)
     //PlayerInput and DataUpdate
     if(kbhit())
     {
+      printf(ANSI_Color_Reset);
       _DEBUG_LAST_PRESSED_BUTTON = getchar();
       MovePlayer(_DEBUG_LAST_PRESSED_BUTTON);
+      printf(ANSI_Color_Black);
     }
 
     /* redraw */
@@ -135,7 +140,11 @@ int main (void)
     }
     
     if (_DEBUG_FRAMECOUNTER % __FramesPerSecond == 0)
+    {
+      printf(ANSI_Color_Reset);
       MoveInvaders();
+      printf(ANSI_Color_Black);
+    }
     
     if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
     {
@@ -145,6 +154,7 @@ int main (void)
   }
   /* end game loop */
   
+  printf(ANSI_Color_Reset);
   ShowCursor();
   return 0;
 }
