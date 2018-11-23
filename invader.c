@@ -155,8 +155,8 @@ void ShowSplashScreen()
   printf("/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  ");
 
   GoToTerminalPosition(startRow * 4, startColumn + 10);
-  printf("press enter to start .. ");
-  getchar();
+  printf("press any key to start .. ");
+  getch();
 
   /* clear screen */
   ClearTerminal();

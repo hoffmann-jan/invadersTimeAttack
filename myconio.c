@@ -29,3 +29,45 @@ int kbhit(void)
 
   return 0;
 }
+
+static struct termios old, new;
+
+/* Init new terminal i/o */
+void initTermios(int echo)
+{
+  tcgetattr(0, &old); //old settings
+  new = old; //copy old Settings
+  new.c_lflag &= ~ICANON; //disable buffer
+  if(echo)
+  {
+    new.c_lflag |= ECHO; //Add echo flag
+  }
+  else
+  {
+    new.c_lflag &= ~ECHO; //test => cflag & echo
+  }
+  tcsetattr(0, TCSANOW, &new); //Set new terminal settings
+}
+
+void resetTermios(void)
+{
+  tcsetattr(0,TCSANOW, &old); //Restore old settings
+}
+
+char getch_(int echo) //private, "overload"
+{
+  char ch;
+  initTermios(echo); //new term settings to skip RETURN need
+  ch = getchar();
+  resetTermios();
+  return ch;
+}
+
+char getch(void)
+{
+  return getch_(0);
+}
+char getche(void)
+{
+  return getch_(1);
+}

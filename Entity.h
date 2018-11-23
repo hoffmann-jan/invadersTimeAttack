@@ -1,3 +1,5 @@
+#ifndef ENTITY_H
+#define ENTITY_H
 struct Entity
 {
   struct Position *Position;
@@ -7,3 +9,5 @@ struct Entity
   /* use in shield object */
   int Health;
 };
+
+#endif
