@@ -48,6 +48,7 @@
 #define __SpacerBar '_'
 /* moving support */
 #define __MoveHorizontalStep 2
+#define __FramesPerSecond 30
 
 /* debugvariablen */
 //enable step by step loop
@@ -81,7 +82,9 @@ void ValidateInvaderDirection();
 
 /* global variables */
 bool invaderDirection = false;
+bool invaderMoveForwart = false;
 int score = 0;
+int bounceCounter = 1;
 int playerHealth = 0;
 struct winsize terminalSize;
 struct List *invaders = NULL;
@@ -90,6 +93,7 @@ struct Position *playerPosition = NULL;
 
 int main (void)
 {
+
   /* get terminal size */
   ioctl(0, TIOCGWINSZ, &terminalSize);
 
@@ -110,7 +114,7 @@ int main (void)
   while (true)
   {
     /* 1000000 = 1s */
-    usleep(1000000 / 30);
+    usleep(1000000 / __FramesPerSecond);
 
     _DEBUG_FRAMECOUNTER++;
     //PlayerInput and DataUpdate
@@ -124,7 +128,13 @@ int main (void)
     //ClearTerminal();
     //Draw();
     //printf("%d - %ld - Frames:%d", _DEBUG_LAST_PRESSED_BUTTON, begin - time(NULL), _DEBUG_FRAMECOUNTER);
-    if (_DEBUG_FRAMECOUNTER % 30 == 0)
+    if (bounceCounter % 4 == 0)
+    {
+      invaderMoveForwart = true;
+      bounceCounter = 1;
+    }
+    
+    if (_DEBUG_FRAMECOUNTER % __FramesPerSecond == 0)
       MoveInvaders();
     
     if (_DEBUG_LAST_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
@@ -344,15 +354,22 @@ void MoveInvaders()
     DeleteChar(invaderList->Entity->Position);
 
     /* move */
-    if (!invaderDirection) /* true, left; flase, right */
+
+    if (invaderMoveForwart)
     {
-      invaderList->Entity->Position->Column = invaderList->Entity->Position->Column + __MoveHorizontalStep;
+      invaderList->Entity->Position->Row++;
     }
     else
     {
-      invaderList->Entity->Position->Column = invaderList->Entity->Position->Column - __MoveHorizontalStep;
+      if (!invaderDirection) /* true, left; flase, right */
+      {
+        invaderList->Entity->Position->Column = invaderList->Entity->Position->Column + __MoveHorizontalStep;
+      }
+      else
+      {
+        invaderList->Entity->Position->Column = invaderList->Entity->Position->Column - __MoveHorizontalStep;
+      }
     }
-
 
     /* draw */
     PrintChar(invaderList);
@@ -360,6 +377,7 @@ void MoveInvaders()
     /* next */
     invaderList = invaderList->Next;
   }
+  invaderMoveForwart = false;
 }
 
 void MovePlayer(int direction)
@@ -411,7 +429,13 @@ void ValidateInvaderDirection()
   }
 
   if (min == 1 && invaderDirection == true)
+  {
     invaderDirection = !invaderDirection;
+    bounceCounter++;
+  }
   if (max == terminalSize.ws_col && invaderDirection == false)
+  {
     invaderDirection = !invaderDirection;
+    bounceCounter++;
+  }
 }
