@@ -274,7 +274,7 @@ void BuildShields()
       || (ninth * 5 < cursor && cursor <= ninth * 6)
       || (ninth * 7 < cursor && cursor <= ninth * 8))
       {
-        struct List *shield = AllocFullListElement();
+        struct List *shield = (struct List *)AllocFullListElement();
         shield->Entity->Health = __ShieldObjectHealth;
         shield->Entity->Position->Column = cursor;
         shield->Entity->Position->Row = shieldRow;
