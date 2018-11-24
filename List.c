@@ -79,9 +79,9 @@ struct List* RemoveAndDestroyElement(struct List *removeElement)
     returnElement = leftElement;
   }
 
-  free(removeElement->Entity->Position);
-  free(removeElement->Entity);
-  free(removeElement);
+  //free(removeElement->Entity->Position);
+  //free(removeElement->Entity);
+  //free(removeElement);
   return returnElement;
 }
 
@@ -126,7 +126,7 @@ int GetListCount(struct List *ListElement)
   if (ListElement == NULL)
     return 0;
 
-  ListElement = GetFirstElement(ListElement);
+  ListElement = (struct List *)GetFirstElement(ListElement);
 
   int count = 1;
   while (ListElement->Next != NULL)
