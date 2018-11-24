@@ -146,6 +146,7 @@ int main (void)
     {
       printf(ANSI_Color_Reset);
       MoveInvaders();
+      DetectCollision();
       printf(ANSI_Color_Black);
     }
 
@@ -153,6 +154,7 @@ int main (void)
     {
       printf(ANSI_Color_Reset);
       MoveProjectiles();
+      DetectCollision();
       printf(ANSI_Color_Black);
     }
     
@@ -196,14 +198,13 @@ void ShowSplashScreen()
   GoToTerminalPosition(1, 1);
 }
 
-
 void Init()
 {
   /* create invaders */
   while ( GetListCount(invaders) < (__InvaderPerRow * __InvaderRowCount) )
   {
     /* allocate invader */
-    struct List * listElement = AllocFullListElement();
+    struct List * listElement = (struct List *)AllocFullListElement();
 
     /* set properties */
     if (invaders == NULL)
@@ -220,7 +221,7 @@ void Init()
     listElement->Entity->SymbolSwitch = false;
 
     /* add to List */
-    invaders = AddElement(invaders, listElement);
+    invaders = (struct List *)AddElement(invaders, listElement);
   }
 
   /* place shield objects */
@@ -282,7 +283,7 @@ void BuildShields()
         shield->Entity->SymbolTwo = __ShieldObjectAppearenceLowHealth;
         shield->Entity->SymbolSwitch = true;
 
-        shieldObjects = AddElement(shieldObjects ,shield);
+        shieldObjects = (struct List *)AddElement(shieldObjects ,shield);
       }
 
     cursor++;
@@ -292,7 +293,7 @@ void BuildShields()
 void Draw()
 {
   /* draw invaders */
-  struct List *invaderList = GetFirstElement(invaders);
+  struct List *invaderList = (struct List *)GetFirstElement(invaders);
   bool continueOperation = true;
 
   while (continueOperation)
@@ -310,7 +311,7 @@ void Draw()
   }
 
   /* draw shields */
-  struct List *shields = GetFirstElement(shieldObjects);
+  struct List *shields = (struct List *)GetFirstElement(shieldObjects);
   continueOperation = true;
   while (continueOperation)
   {
@@ -326,7 +327,7 @@ void Draw()
   }
 
   /* draw projectiles */
-  struct List *projectileList = GetFirstElement(projectiles);
+  struct List *projectileList = (struct List *)GetFirstElement(projectiles);
   while (projectileList != NULL)
   {
     PrintChar(projectileList);
@@ -372,14 +373,14 @@ void DeleteChar(struct Position * position)
 
 void MoveInvaders()
 {
-  struct List *invaderList = GetFirstElement(invaders);
+  struct List *invaderList = (struct List *)GetFirstElement(invaders);
 
   /* check direction */
   ValidateInvaderDirection();   
   
   while (invaderList != NULL)
   {
-    /* delete od position */
+    /* delete old position */
     DeleteChar(invaderList->Entity->Position);
 
     /* move */
@@ -417,10 +418,12 @@ void MovePlayer(int direction)
     switch (direction)
     {
       case 68: /* left */
-        playerPosition->Column = playerPosition->Column - 1;
+        if (playerPosition->Column - 1 >= 1)
+          playerPosition->Column = playerPosition->Column - 1;
         break;
       case 67: /* right */
-        playerPosition->Column = playerPosition->Column + 1;
+        if (playerPosition->Column + 1 <= terminalSize.ws_col)
+          playerPosition->Column = playerPosition->Column + 1;
         break;
     }
     DrawPlayer();
@@ -435,7 +438,7 @@ void DrawPlayer()
 
 void ValidateInvaderDirection()
 {
-  struct List *list = GetFirstElement(invaders);
+  struct List *list = (struct List *)GetFirstElement(invaders);
 
   if (list == NULL)
     return;
@@ -471,7 +474,7 @@ void ValidateInvaderDirection()
 
 void Shoot()
 {
-  struct List * projectile = AllocFullListElement();
+  struct List * projectile = (struct List *)AllocFullListElement();
 
   projectile->Entity->Position->Column = playerPosition->Column;
   projectile->Entity->Position->Row = playerPosition->Row - 1;
@@ -480,12 +483,12 @@ void Shoot()
   projectile->Entity->SymbolSwitch = true;
   PrintChar(projectile);
 
-  projectiles = AddElement(projectiles, projectile);
+  projectiles = (struct List *)AddElement(projectiles, projectile);
 }
 
 void MoveProjectiles()
 {
-  struct List *projectileList = GetFirstElement(projectiles);
+  struct List *projectileList = (struct List *)GetFirstElement(projectiles);
   while (projectileList != NULL)
   {
     DeleteChar(projectileList->Entity->Position);
@@ -495,9 +498,21 @@ void MoveProjectiles()
     }
     else
     {
+      /* move */
       projectileList->Entity->Position->Row--;
+
+      /* draw */
       PrintChar(projectileList);
+      
+      /* next */
       projectileList = projectileList->Next;
     }
   }
+}
+
+void DetectCollision()
+{
+  //struct List *inv = (struct List *)GetFirstElement(invaders);
+  //struct List *shields = (struct List *)GetFirstElement(shieldObjects);
+  //struct List *pros = (struct List *)GetFirstElement(projectiles);
 }
