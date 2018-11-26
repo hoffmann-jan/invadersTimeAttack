@@ -18,11 +18,7 @@
 #include "List.h"
 #include "Entity.h"
 #include "Position.h"
-
-/* define system call changes */
-// NOCH BUGGY!
-//#define AvoidReturn() system ("/bin/stty raw")
-//#define ResetAvoidReturn() system("/bin/stty cooked")
+#include "InputThread.h"
 
 /* define terminal functions */
 #define ClearTerminal() printf("\033[H\033[J")
@@ -52,10 +48,19 @@
 /* moving support */
 #define __MoveHorizontalStep 2
 #define __FramesPerSecond 30
+/* debugmode */
+#define DEBUG_MODE_ENABLED //Comment to dissable
+
+#ifdef DEBUG_MODE_ENABLED
+#define LOG(format, ...) printf(format,__VA_ARGS)
+int _DEBUG_MODE = 1;
+#else
+#define LOG(format, ...)
+int _DEBUG_MODE = 0;
+#endif
 
 /* debugvariablen */
 //enable step by step loop
-int _DEBUG_MODE = 1;
 int _PRESSED_BUTTON = 0;
 int _DEBUG_FRAMECOUNTER = 0;
 
@@ -111,30 +116,33 @@ int main (void)
   /* game initialisation */
   Init();
   
-  time_t begin;
-  begin = time(NULL);
-  
   ClearTerminal();
   Draw();
   printf(ANSI_Color_Black);
+
+  /*initalite input thread */
+  //InputThread *thread = threadAlloc();
+  //int key;
+  //threadStart(thread);
 
   /* game loop */
   while (true)
   {
     /* 1000000 = 1s */
     usleep(1000000 / __FramesPerSecond);
-
+    
     _DEBUG_FRAMECOUNTER++;
     //PlayerInput and DataUpdate
     if(kbhit())
     {
       printf(ANSI_Color_Reset);
-      _PRESSED_BUTTON = getchar();
+      _PRESSED_BUTTON = getch();
       MovePlayer(_PRESSED_BUTTON);
-      if (_PRESSED_BUTTON == 32)
-        Shoot();
+      if (_PRESSED_BUTTON == 32) Shoot();
       printf(ANSI_Color_Black);
     }
+    
+    
 
     /* redraw */
     //ClearTerminal();
