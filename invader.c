@@ -12,6 +12,8 @@
 #include <unistd.h>
 /* time */
 #include <time.h>
+/* strcpy */
+#include <string.h>
 
 /**/
 #include "myconio.h"
@@ -27,6 +29,7 @@
 #define ShowCursor() printf("\e[?25h")
 #define ANSI_Color_Reset "\x1b[0m"
 #define ANSI_Color_Black "\x1b[30m"
+#define ANSI_Color_Red "\x1b[31m"
 /* define Invader dimension */
 #define __InvaderPerRow 11
 #define __InvaderRowCount 5
@@ -66,6 +69,8 @@ int _DEBUG_FRAMECOUNTER = 0;
 
 /* draw support */
 void ShowSplashScreen();
+int ShowGameOverScreen();
+int PrintSplashScreen(char ** image, int imageLength, char ** message, int messageLength);
 void Draw();
 
 /* helpers */
@@ -91,6 +96,8 @@ void DetectCollision();
 void Shoot();
 void ValidateInvaderDirection();
 void DealShieldDamage(struct List *shield);
+void GameLoop();
+int RunGame();
 
 /* global variables */
 bool invaderDirection = false;
@@ -106,108 +113,59 @@ struct Position *playerPosition = NULL;
 
 int main (void)
 {
-  /* get terminal size */
-  ioctl(0, TIOCGWINSZ, &terminalSize);
-
-  /* welcome window */
-  ShowSplashScreen();
-  HideCursor();
-
-  /* game initialisation */
-  Init();
-  
-  ClearTerminal();
-  Draw();
-  printf(ANSI_Color_Black);
-
-  /*initalite input thread */
-  //InputThread *thread = threadAlloc();
-  //int key;
-  //threadStart(thread);
-
-  /* game loop */
   while (true)
   {
-    /* 1000000 = 1s */
-    usleep(1000000 / __FramesPerSecond);
-    
-    _DEBUG_FRAMECOUNTER++;
-    //PlayerInput and DataUpdate
-    if(kbhit())
-    {
-      printf(ANSI_Color_Reset);
-      _PRESSED_BUTTON = getch();
-      MovePlayer(_PRESSED_BUTTON);
-      if (_PRESSED_BUTTON == 32) Shoot();
-      printf(ANSI_Color_Black);
-    }
-    
-    
-
-    /* redraw */
-    //ClearTerminal();
-    //Draw();
-    //printf("%d - %ld - Frames:%d", _PRESSED_BUTTON, begin - time(NULL), _DEBUG_FRAMECOUNTER);
-    if (bounceCounter % 4 == 0)
-    {
-      invaderMoveForwart = true;
-      bounceCounter = 1;
-    }
-    
-    if (_DEBUG_FRAMECOUNTER % __FramesPerSecond == 0)
-    {
-      printf(ANSI_Color_Reset);
-      MoveInvaders();
-      DetectCollision();
-      printf(ANSI_Color_Black);
-    }
-
-    if (_DEBUG_FRAMECOUNTER % (__FramesPerSecond / 3) == 0)
-    {
-      printf(ANSI_Color_Reset);
-      MoveProjectiles();
-      DetectCollision();
-      printf(ANSI_Color_Black);
-    }
-    
-    if (_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
-    {
-      ClearTerminal();
+    _PRESSED_BUTTON = 0;
+    if(1 == RunGame())
       break;
-    }
   }
-  /* end game loop */
-  
+
   printf(ANSI_Color_Reset);
   ShowCursor();
   return 0;
 }
 
-void ShowSplashScreen()
+int PrintSplashScreen(char ** image, int imageLength, char ** message, int messageLength)
 {
   ClearTerminal();
+  printf(ANSI_Color_Reset);
   int fifth = (int) terminalSize.ws_row / 5;
   int startRow = fifth * 2;
   int startColumn = ((int) terminalSize.ws_col / 2) - 25;
-  GoToTerminalPosition(startRow, startColumn);
-  printf("    _____   ___    _____    ____  __________  _____");
-  GoToTerminalPosition(startRow + 1, startColumn);
-  printf("   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/");
-  GoToTerminalPosition(startRow + 2, startColumn);
-  printf("   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ ");
-  GoToTerminalPosition(startRow + 3, startColumn);
-  printf(" _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
-  GoToTerminalPosition(startRow + 4, startColumn);
-  printf("/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  ");
 
-  GoToTerminalPosition(startRow * 4, startColumn + 10);
-  printf("press any key to start .. ");
-  getch();
+  for (int i = 0; i < imageLength; i++)
+  {
+    GoToTerminalPosition(startRow + i, startColumn);
+    printf("%s", image[i]);
+  }
+  for(int i = imageLength - 1; i >= 0; i--)
+  {
+      free(image[i]);
+  }
+  free(image);
+
+  for (int m = 0; m < messageLength; m++)
+  {
+    GoToTerminalPosition(fifth * 4 + m, startColumn + 1);
+    printf("%s", message[m]);
+  }
+  for(int i = messageLength - 1; i >= 0; i--)
+  {
+      free(message[i]);
+  }
+  free(message);
+
+  char result = getch();
 
   /* clear screen */
   ClearTerminal();
   /* move cursor to top left */
   GoToTerminalPosition(1, 1);
+
+  if (result == 'q')
+    return 1;
+  else
+    return 0;
 }
 
 void Init()
@@ -591,4 +549,148 @@ void DrawHealth()
 {
   GoToTerminalPosition(terminalSize.ws_row - 1, (int) terminalSize.ws_col / 2);
   printf("<health: %d>", playerHealth);
+}
+
+int ShowGameOverScreen()
+{
+  int imageLength = 5;
+  char ** image = (char **)malloc(sizeof(char *) * imageLength);
+
+  for (int i = 0; i < imageLength; i++)
+  {
+    image[i] = malloc(sizeof(char) * 55 + 1 );
+  }
+
+  strcpy(image[0], "  ____    _    __  __ _____    _____     _______ ____  ");
+  strcpy(image[1], " / ___|  / \\  |  \\/  | ____|  / _ \\ \\   / / ____|  _ \\ ");
+  strcpy(image[2], "| |  _  / _ \\ | |\\/| |  _|   | | | \\ \\ / /|  _| | |_) |");
+  strcpy(image[3], "| |_| |/ ___ \\| |  | | |___  | |_| |\\ V / | |___|  _ < ");
+  strcpy(image[4], " \\____/_/   \\_\\_|  |_|_____|  \\___/  \\_/  |_____|_| \\_\\");
+
+  int messageLength = 3;
+  char ** message = (char **)malloc(sizeof(char *) * messageLength);
+
+  for (int i = 0; i < messageLength; i++)
+  {
+    message[i] = malloc(sizeof(char) * 90 + 1 );
+  }
+
+  char *scoreString = (char*)malloc(90 * sizeof(char));
+  sprintf(scoreString, "%s %d", "your score: ", score);
+  strcpy(message[0], scoreString);
+  strcpy(message[1], "");
+  strcpy(message[2], "press any key to start .. or 'q' to quit");
+
+  return PrintSplashScreen(image, imageLength, message, messageLength);
+}
+
+void FreeAll()
+{
+
+}
+
+void ShowSplashScreen()
+{
+  int imageLength = 5;
+  char ** image = (char **)malloc(sizeof(char *) * imageLength);
+
+  for (int i = 0; i < imageLength; i++)
+  {
+    image[i] = malloc(sizeof(char) * 51 + 1 );
+  }
+
+  strcpy(image[0], "    _____   ___    _____    ____  __________  _____");
+  strcpy(image[1], "   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/");
+  strcpy(image[2], "   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ ");
+  strcpy(image[3], " _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
+  strcpy(image[4], "/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  ");
+
+  int messageLength = 1;
+  char ** message = (char **)malloc(sizeof(char *) * messageLength);
+  message[0] = malloc(sizeof(char) * 26 + 1 );
+  strcpy(message[0], "press any key to start .. ");
+
+  PrintSplashScreen(image, imageLength, message, messageLength);
+}
+
+void GameLoop()
+{
+  /* game loop */
+  while (true)
+  {
+    /* 1000000 = 1s */
+    usleep(1000000 / __FramesPerSecond);
+    
+    _DEBUG_FRAMECOUNTER++;
+    //PlayerInput and DataUpdate
+    if(kbhit())
+    {
+      printf(ANSI_Color_Reset);
+      _PRESSED_BUTTON = getch();
+      MovePlayer(_PRESSED_BUTTON);
+      if (_PRESSED_BUTTON == 32) Shoot();
+      printf(ANSI_Color_Black);
+    }
+    
+    
+
+    /* redraw */
+    //ClearTerminal();
+    //Draw();
+    //printf("%d - %ld - Frames:%d", _PRESSED_BUTTON, begin - time(NULL), _DEBUG_FRAMECOUNTER);
+    if (bounceCounter % 4 == 0)
+    {
+      invaderMoveForwart = true;
+      bounceCounter = 1;
+    }
+    
+    if (_DEBUG_FRAMECOUNTER % __FramesPerSecond == 0)
+    {
+      printf(ANSI_Color_Reset);
+      MoveInvaders();
+      DetectCollision();
+      printf(ANSI_Color_Black);
+    }
+
+    if (_DEBUG_FRAMECOUNTER % (__FramesPerSecond / 3) == 0)
+    {
+      printf(ANSI_Color_Reset);
+      MoveProjectiles();
+      DetectCollision();
+      printf(ANSI_Color_Black);
+    }
+    
+    if (_PRESSED_BUTTON == 10) /* ENTER TO EXIT DEBUG */
+    {
+      ClearTerminal();
+      break;
+    }
+  }
+  /* end game loop */
+}
+
+int RunGame()
+{
+  /* get terminal size */
+  ioctl(0, TIOCGWINSZ, &terminalSize);
+
+  /* welcome window */
+  ShowSplashScreen();
+  HideCursor();
+
+  /* game initialisation */
+  Init();
+  
+  ClearTerminal();
+  Draw();
+  printf(ANSI_Color_Black);
+
+  /*initalite input thread */
+  //InputThread *thread = threadAlloc();
+  //int key;
+  //threadStart(thread);
+
+  GameLoop();
+
+  return ShowGameOverScreen();
 }
