@@ -27,7 +27,7 @@ static void *threadFunction(void *arg)
             this->key = ch;
             pthread_mutex_unlock(&this->mutex); //wieder verfügbar machen
         }
-        usleep(500); //reduziere prozessorlast
+        usleep(5000); //reduziere prozessorlast
     }
 }
 
