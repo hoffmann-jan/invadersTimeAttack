@@ -72,6 +72,9 @@ void BuildShields();
 void PrintChar(struct List *object);
 void DeleteChar(struct Position * position);
 void DrawPlayer();
+void DrawScore();
+void DrawHealth();
+void IncrementScore(int value);
 
 
 /* game logic */
@@ -82,6 +85,7 @@ void RemoveDefeatedEntities();
 void DetectCollision();
 void Shoot();
 void ValidateInvaderDirection();
+void DealShieldDamage(struct List *shield);
 
 /* global variables */
 bool invaderDirection = false;
@@ -348,12 +352,10 @@ void Draw()
   }
 
   /* draw score */
-  GoToTerminalPosition(terminalSize.ws_row - 1, 1);
-  printf("<score: %d>", score);
+  DrawScore();
 
   /* draw health */
-  GoToTerminalPosition(terminalSize.ws_row - 1, (int) terminalSize.ws_col / 2);
-  printf("<health: %d>", playerHealth);
+  DrawHealth();
 }
 
 void PrintChar(struct List *object)
@@ -387,7 +389,7 @@ void MoveInvaders()
     if (invaderMoveForwart)
     {
       invaderList->Entity->Position->Row++;
-      invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
+      invaderList->Entity->SymbolSwitch = false;
     }
     else
     {
@@ -403,6 +405,7 @@ void MoveInvaders()
 
     /* draw */
     PrintChar(invaderList);
+    invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
 
     /* next */
     invaderList = invaderList->Next;
@@ -512,7 +515,72 @@ void MoveProjectiles()
 
 void DetectCollision()
 {
-  //struct List *inv = (struct List *)GetFirstElement(invaders);
-  //struct List *shields = (struct List *)GetFirstElement(shieldObjects);
-  //struct List *pros = (struct List *)GetFirstElement(projectiles);
+  struct List *projectile = (struct List *)GetFirstElement(projectiles);
+  struct List *invader = (struct List *)GetFirstElement(invaders);
+  struct List *shield = (struct List *)GetFirstElement(shieldObjects);
+
+  while(projectile != NULL)
+  {
+    bool hit = false;
+    /* collision with a shield */
+    while(shield != NULL)
+    {
+      if (shield->Entity->Position->Row == projectile->Entity->Position->Row
+      && shield->Entity->Position->Column == projectile->Entity->Position->Column)
+      {
+        DealShieldDamage(shield);
+        hit = true;
+        break;
+      }
+      shield = shield->Next;
+    }
+    if (hit)
+    {
+      projectile = (struct List *)RemoveAndDestroyElement(projectile);
+      break;
+    }
+    /* collision with a invader */
+    while(invader != NULL)
+    {
+      if (invader->Entity->Position->Row == projectile->Entity->Position->Row
+      && invader->Entity->Position->Column == projectile->Entity->Position->Column)
+      {
+        //invader = (struct List *)RemoveAndDestroyElement(invader);
+        //projectile = (struct List *)RemoveAndDestroyElement(projectile);
+        IncrementScore(50);
+        break;
+      }
+      invader = invader->Next;
+    }
+    projectile = projectile->Next;
+  }
+
+}
+
+void DealShieldDamage(struct List *shield)
+{
+  shield->Entity->Health = shield->Entity->Health - 1;
+  if (shield->Entity->Health == 0)
+  {
+    DeleteChar(shield->Entity->Position);
+    //shield = (struct List *)RemoveAndDestroyElement(shield);
+  }
+}
+
+void IncrementScore(int value)
+{
+  score += value;
+  DrawScore();
+}
+
+void DrawScore()
+{
+  GoToTerminalPosition(terminalSize.ws_row - 1, 1);
+  printf("<score: %d>", score);
+}
+
+void DrawHealth()
+{
+  GoToTerminalPosition(terminalSize.ws_row - 1, (int) terminalSize.ws_col / 2);
+  printf("<health: %d>", playerHealth);
 }
