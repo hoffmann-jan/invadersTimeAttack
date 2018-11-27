@@ -39,10 +39,8 @@ int main(void)
 
         if((frameCounter % (_FramesPerSecond) == 0)) //nach 1 Sekunde
         {
-            
             MoveInvaders();    
-            //frameCounter = 0;
-            
+            frameCounter = 0;
         }
 
         //obere Rechte ecke Frameinfo
@@ -74,7 +72,7 @@ void SetUp()
     cbreak();               /* like raw, but enables CTRL+C */
     keypad(stdscr, TRUE);   /* enabel keys like F1, arrowkeys ... */
     noecho();               /* disable input buffer on screen e.g. escape stuff*/
-    curs_set(2);            /* disable cursor blinki blinki */
+    curs_set(0);            /* disable cursor blinki blinki */
     //nodelay(stdscr, 1);     /* */
     //srand(time(NULL));
 }

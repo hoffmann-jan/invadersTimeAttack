@@ -5,8 +5,8 @@ all: ncurseInvader
 prog.bin: clean obj/invader.o obj/myconio.o obj/List.o obj/InputThread.o
 	cc -o bin/prog.bin obj/invader.o obj/myconio.o obj/List.o obj/InputThread.o -lpthread
 
-ncurseInvader: clean invader_ncurses.c obj/InputThread.o obj/List.o
-	cc -o bin/invader_ncurses.bin obj/InputThread.o obj/List.o invader_ncurses.c -lncurses -lpthread
+ncurseInvader: clean invader_ncurses.c obj/InputThread.o obj/List.o 
+	cc -o bin/invader_ncurses.bin obj/InputThread.o obj/List.o invader_ncurses.c -lncurses -lpthread -O3
 
 obj/invader.o: invader.c
 	cc -c invader.c -o obj/invader.o
