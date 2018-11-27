@@ -20,8 +20,10 @@
 // GameElements
 #define _InvaderPerRow 11
 #define _InvaderRowCount 5
-#define _InvaderAppearence 'V'
-#define _InvaderAppearenceTwo 'W'
+#define _InvaderAppearence 'X'
+#define _InvaderAppearenceTwo 'V'
+#define _InvaderAppearenceThree 'W'
+#define _InvaderAppearenceFour 'w'
 #define _InvaderHorizontalSpace 5
 #define _InvaderVerticalSpace 2
 #define _InvaderFirstRow 2
