@@ -2,7 +2,11 @@
 #include <unistd.h>
 
 #include "InputThread.h" //include also stdbool & pthread
+
+
 #include "myconio.h"
+//#include <ncurses.h>
+#define kbhit() true
 
 InputThread *threadAlloc()
 {
@@ -12,6 +16,8 @@ InputThread *threadAlloc()
     thread->stop = false;
  
     pthread_mutex_init(&thread->mutex,NULL); //mutex bereitstellen
+
+    return thread;
 }
 
 //bedingte funktion für übergabe an pthread

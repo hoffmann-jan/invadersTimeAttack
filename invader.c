@@ -52,11 +52,15 @@
 #define DEBUG_MODE_ENABLED //Comment to dissable
 
 #ifdef DEBUG_MODE_ENABLED
-#define LOG(format, ...) printf(format,__VA_ARGS)
-int _DEBUG_MODE = 1;
+#define LOG(format, ...)                              \
+  printf(ANSI_Color_Reset);                           \
+  GoToTerminalPosition(terminalSize.ws_row - 1,1);    \
+  printf(format,__VA_ARGS__);                         \
+  printf(ANSI_Color_Black);           
+#define _DEBUG_MODE 1
 #else
 #define LOG(format, ...)
-int _DEBUG_MODE = 0;
+#define _DEBUG_MODE 0
 #endif
 
 /* debugvariablen */
@@ -80,7 +84,6 @@ void DrawPlayer();
 void DrawScore();
 void DrawHealth();
 void IncrementScore(int value);
-
 
 /* game logic */
 void MoveInvaders();
@@ -121,18 +124,23 @@ int main (void)
   printf(ANSI_Color_Black);
 
   /*initalite input thread */
-  //InputThread *thread = threadAlloc();
-  //int key;
-  //threadStart(thread);
+  InputThread *thread = threadAlloc();
+  int key;
+  // threadStart(thread);
 
   /* game loop */
-  while (true)
+  // while (true)
+  while(thread->key != 27)
   {
     /* 1000000 = 1s */
     usleep(1000000 / __FramesPerSecond);
     
     _DEBUG_FRAMECOUNTER++;
     //PlayerInput and DataUpdate
+    
+    //thread based input - PROTOTYP
+    // _PRESSED_BUTTON = thread->key;
+
     if(kbhit())
     {
       printf(ANSI_Color_Reset);
@@ -140,9 +148,8 @@ int main (void)
       MovePlayer(_PRESSED_BUTTON);
       if (_PRESSED_BUTTON == 32) Shoot();
       printf(ANSI_Color_Black);
+      LOG("button: %d",_PRESSED_BUTTON);
     }
-    
-    
 
     /* redraw */
     //ClearTerminal();
@@ -583,12 +590,12 @@ void IncrementScore(int value)
 
 void DrawScore()
 {
-  GoToTerminalPosition(terminalSize.ws_row - 1, 1);
+  GoToTerminalPosition(terminalSize.ws_row - 2, 1);
   printf("<score: %d>", score);
 }
 
 void DrawHealth()
 {
-  GoToTerminalPosition(terminalSize.ws_row - 1, (int) terminalSize.ws_col / 2);
+  GoToTerminalPosition(terminalSize.ws_row - 2, (int) terminalSize.ws_col / 2);
   printf("<health: %d>", playerHealth);
 }

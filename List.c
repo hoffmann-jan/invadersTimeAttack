@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+
 #include "List.h"
 #include "Entity.h"
 #include "Position.h"
@@ -45,7 +46,7 @@ struct List* InsertElement(struct List *ListElement, struct List *newElement)
 
 struct List* RemoveAndDestroyElement(struct List *removeElement)
 {
-    struct List *returnElement = NULL;
+  struct List *returnElement = NULL;
   /* element in the middle of List */
   if (removeElement->Next != NULL && removeElement->Previous != NULL)
   {
@@ -79,9 +80,9 @@ struct List* RemoveAndDestroyElement(struct List *removeElement)
     returnElement = leftElement;
   }
 
-  //free(removeElement->Entity->Position);
-  //free(removeElement->Entity);
-  //free(removeElement);
+  // free(removeElement->Entity->Position);
+  // free(removeElement->Entity);
+  // free(removeElement);
   return returnElement;
 }
 
