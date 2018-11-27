@@ -2,9 +2,6 @@
 #include "InputThread.h"
 
 /* globals */
-// settings
-struct winsize terminalSize;
-int row, col;
 
 // entitys
 struct List *invaders = NULL;
@@ -15,12 +12,7 @@ int bounceCounter = 1;
 int frameCounter = 0;
 
 int main(void)
-{   
-    //get Window Properties
-    ioctl(0, TIOCGWINSZ, &terminalSize);
-    row = terminalSize.ws_row;
-    col = terminalSize.ws_col;
-
+{    
     /* starte Inputthread , danke an Julian für den support <3 */
     InputThread *inputThread = threadAlloc();
     threadStart(inputThread);
@@ -50,7 +42,7 @@ int main(void)
     }
 
     Dispose();
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
@@ -78,11 +70,11 @@ void ShowSplashScreen()
 {
     ClearTerminal();
   
-    int fifth = (int) terminalSize.ws_row / 5;
+    int fifth = (int) LINES / 5;
     int startRow = fifth * 2;
-    int startColumn = ((int) terminalSize.ws_col / 2) - 25;
+    int startColumn = ((int) COLS / 2) - 25;
 
-    mvprintw(startRow, startColumn,     "    ____   ___    _____    ____   ___________  _____");
+    mvprintw(startRow, startColumn,     "    ____    ___    _____    ____   ___________  _____");
     mvprintw(startRow + 1, startColumn, "   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/");
     mvprintw(startRow + 2, startColumn, "   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ ");
     mvprintw(startRow + 3, startColumn, " _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
@@ -255,7 +247,7 @@ void ValidateInvaderDirection()
         invaderDirection = !invaderDirection;
         bounceCounter++;
     }
-    if (max == terminalSize.ws_col && invaderDirection == false)
+    if (max == COLS && invaderDirection == false)
     {
         invaderDirection = !invaderDirection;
         bounceCounter++;
