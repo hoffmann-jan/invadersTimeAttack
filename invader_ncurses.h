@@ -15,7 +15,7 @@
 // =================== DEFINITIONS =====================
 
 // Settings
-#define _FramesPerSecond 30
+#define _FramesPerSecond 15
 
 // GameElements
 #define _InvaderPerRow 11
@@ -42,6 +42,7 @@ void SetUp();
 void ShowSplashScreen();
 void Draw();
 void PrintChar();
+void BuildShields();
 
 /* game logic*/
 void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount);
