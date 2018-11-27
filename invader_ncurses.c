@@ -11,7 +11,7 @@ bool invaderDirection = false;
 bool invaderMoveForwart = false;
 int bounceCounter = 1;
 
-int frameCounter = 0;
+unsigned long long frameCounter = 0;
 
 int main(void)
 {    
@@ -32,7 +32,7 @@ int main(void)
         key = inputThread->key;
 
         /* 1000000 = 1s */
-        usleep(1000000 / _FramesPerSecond);
+        usleep(1000000 / _FramesPerSecond * 3);
         frameCounter++;
         
         Draw(); 
@@ -40,19 +40,18 @@ int main(void)
         if((frameCounter % (_FramesPerSecond) == 0)) //nach 1 Sekunde
         {
             MoveInvaders();    
-            frameCounter = 0;
+            //frameCounter = 0;
         }
 
         //obere Rechte ecke Frameinfo
         mvprintw(1,COLS - 10, "          ");
-        mvprintw(1,COLS - 10, "Frame: %d", frameCounter);
+        mvprintw(1,COLS - 10, "Frame: %u", frameCounter);
         mvprintw(2,COLS - 10, "          ");
         mvprintw(2,COLS - 10, "Key: %d", key);
         
         refresh();
     }
 
-    ClearTerminal();
     Dispose();
     return EXIT_SUCCESS;
 }
@@ -76,6 +75,7 @@ void Dispose()
     //ncurse release
     refresh();
     endwin();              /* stop ncurses mode IMPORTANT! ;D*/
+    ClearTerminal();
 }
 
 void ShowSplashScreen()
