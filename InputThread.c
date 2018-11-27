@@ -4,8 +4,8 @@
 #include "InputThread.h" //include also stdbool & pthread
 
 
-#include "myconio.h"
-//#include <ncurses.h>
+// #include "myconio.h"
+#include <ncurses.h>
 #define kbhit() true
 
 InputThread *threadAlloc()

@@ -1,5 +1,5 @@
-# all: ncurseInvader
- all: prog.bin
+all: ncurseInvader
+# all: prog.bin
 # all: example
 
 prog.bin: clean obj/invader.o obj/myconio.o obj/List.o obj/InputThread.o
