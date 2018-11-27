@@ -41,7 +41,7 @@ void SetUp();
 /* draw support */
 void ShowSplashScreen();
 void Draw();
-void PrintChar();
+void PrintEntity();
 void BuildShields();
 
 /* game logic*/

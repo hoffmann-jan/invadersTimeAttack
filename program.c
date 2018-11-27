@@ -68,11 +68,11 @@ void SetUp()
     initscr();              /* Start ncurses mode */
     //raw();                /* disable line buffering - no Endline or CR needed */
     cbreak();               /* like raw, but enables CTRL+C */
-    keypad(stdscr, TRUE);   /* enabel keys like F1, arrowkeys ... */
+    keypad(stdscr, TRUE);   /* enable keys like F1, arrowkeys ... */
     noecho();               /* disable input buffer on screen e.g. escape stuff*/
     curs_set(0);            /* disable cursor blinki blinki */
     //nodelay(stdscr, 1);   /* */
-    //srand(time(NULL));
+    srand(time(NULL));
 }
 
 void Dispose()
@@ -101,7 +101,7 @@ void ShowSplashScreen()
     
     getch();
 
-    /* clear screen */
+    // /* clear screen */
     ClearTerminal();
 }
 
@@ -116,7 +116,7 @@ void Draw()
     {
         while (invaderList->Next != NULL)
         {
-            PrintChar(invaderList);
+            PrintEntity(invaderList);
 
             if (invaderList->Next == NULL) 
                 break;
@@ -126,13 +126,12 @@ void Draw()
     }
 }
 
-void PrintChar(struct List *object)
+void PrintEntity(struct List *object)
 {
     if (object->Entity->SymbolSwitch)
         mvaddch(object->Entity->Position->Row, object->Entity->Position->Column, object->Entity->SymbolOne);
     else
-        mvaddch(object->Entity->Position->Row, object->Entity->Position->Column, object->Entity->SymbolOne);       
-        // printf("%c", object->Entity->SymbolTwo);   
+        mvaddch(object->Entity->Position->Row, object->Entity->Position->Column, object->Entity->SymbolOne);
 }
 
 void DeleteChar(struct Position *pos)
@@ -169,7 +168,6 @@ void Initialize()
         invaders = (struct List *)AddElement(invaders, listElement);
     }
 
-    refresh();
 }
 
 void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount)
@@ -228,8 +226,7 @@ void MoveInvaders()
             }
         }
 
-        /* draw */
-        //PrintChar(invaderList);
+        /* switch Symbols */
         invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
 
         /* next */
