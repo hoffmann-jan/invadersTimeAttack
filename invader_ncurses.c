@@ -38,25 +38,17 @@ int main(void)
         Draw(); 
 
         if((frameCounter % (_FramesPerSecond) == 0)) //nach 1 Sekunde
-        {
-            
+        {    
             MoveInvaders();    
             //frameCounter = 0;
-            
         }
 
         //obere Rechte ecke Frameinfo
-        move(1,COLS - 10);
-        printw("          ");
-        move(1,COLS - 10);
-        printw("Frame: %d", frameCounter);
-
-        move(2,COLS - 10);
-        printw("          ");
-        move(2,COLS - 10);
-        printw("Key: %d", key);
+        mvprintw(1,COLS - 10, "          ");
+        mvprintw(1,COLS - 10, "Frame: %d", frameCounter);
+        mvprintw(2,COLS - 10, "          ");
+        mvprintw(2,COLS - 10, "Key: %d", key);
         
-
         refresh();
     }
 
