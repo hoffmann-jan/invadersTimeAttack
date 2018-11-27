@@ -16,7 +16,6 @@ InputThread *threadAlloc()
     thread->stop = false;
  
     pthread_mutex_init(&thread->mutex,NULL); //mutex bereitstellen
-
     return thread;
 }
 
