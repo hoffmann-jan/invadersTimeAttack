@@ -21,5 +21,20 @@ typedef enum
 
 } Key;
 
+typedef enum
+{
+    UP,
+    DOWN,
+    LEFT,
+    RIGTH
+} Direction;
+
+typedef enum
+{
+    ONE,
+    TWO,
+    THREE,
+    FOUR
+} Symbol;
 
 #endif
