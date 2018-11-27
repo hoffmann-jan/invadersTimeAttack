@@ -20,7 +20,6 @@ int main(void)
     threadStart(inputThread);
     int key = 0;
 
-
     SetUp();                    // prepare tec - spezifics
     ShowSplashScreen();
     Initialize();               // prepare entity's and initial draw
@@ -37,7 +36,7 @@ int main(void)
         
         Draw(); 
 
-        if((frameCounter % (_FramesPerSecond) == 0)) //nach 1 Sekunde
+        if((frameCounter % (_FramesPerSecond / 2) == 0)) 
         {
             MoveInvaders();    
             frameCounter = 0;
