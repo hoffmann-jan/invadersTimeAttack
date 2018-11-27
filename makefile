@@ -1,8 +1,8 @@
 all: ncurseInvader
-# all: prog.bin
+# all: old
 # all: example
 
-prog.bin: clean obj/invader.o obj/myconio.o obj/List.o obj/InputThread.o
+old: clean obj/invader.o obj/myconio.o obj/List.o obj/InputThread.o	
 	cc -o bin/prog.bin obj/invader.o obj/myconio.o obj/List.o obj/InputThread.o -lpthread
 
 ncurseInvader: clean invader_ncurses.c obj/InputThread.o obj/List.o 

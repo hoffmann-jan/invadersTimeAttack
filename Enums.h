@@ -1,5 +1,5 @@
-#ifndef KEY_H
-#define KEY_H
+#ifndef ENUMS_H
+#define ENUMS_H
 
 typedef enum
 {
