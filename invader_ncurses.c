@@ -35,7 +35,7 @@ int main(void)
         key = inputThread->key;
 
         /* 1000000 = 1s */
-        usleep(1000000 / _FramesPerSecond * 3);
+        usleep(1000000 / _FramesPerSecond);
         frameCounter++;
         
         
@@ -47,10 +47,14 @@ int main(void)
         }
 
         //obere Rechte ecke Frameinfo
-        mvprintw(1,COLS - 10, "          ");
-        mvprintw(1,COLS - 10, "Frame: %u", frameCounter);
-        mvprintw(2,COLS - 10, "          ");
-        mvprintw(2,COLS - 10, "Key: %d", key);
+        mvprintw(LINES - 4,COLS - 12, "            ");
+        mvprintw(LINES - 4,COLS - 12, "l: %d, %d", GetFirstElement(invaders)->Entity->Position->Row, GetFirstElement(invaders)->Entity->Position->Column);
+        mvprintw(LINES - 3,COLS - 12, "            ");
+        mvprintw(LINES - 3,COLS - 12, "r: %d, %d", GetLastElement(invaders)->Entity->Position->Row, GetLastElement(invaders)->Entity->Position->Column);
+        mvprintw(LINES - 2,COLS - 12, "            ");
+        mvprintw(LINES - 2,COLS - 12, "Frame: %u", frameCounter);
+        mvprintw(LINES - 1,COLS - 12, "            ");
+        mvprintw(LINES - 1,COLS - 12, "Key: %d", key);
         
     }
 
@@ -203,6 +207,7 @@ void MoveInvaders()
 
     while (invaderList != NULL)
     {
+        invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
         /* delete old position */
         DeleteChar(invaderList->Entity->Position);
 
@@ -241,29 +246,29 @@ void ValidateInvaderDirection()
     if (list == NULL)
         return;
 
-    int min = list->Entity->Position->Column;
-    int max = list->Entity->Position->Column;
+    int min = list->Entity->Position->Column - _MoveHorizontalStep;
+    int max = list->Entity->Position->Column + _MoveHorizontalStep;
 
     int i = 1;
     while (list != NULL)
     {
-        if (list->Entity->Position->Column < min)
-            min = list->Entity->Position->Column;
+        if (list->Entity->Position->Column - _MoveHorizontalStep < min)
+            min = list->Entity->Position->Column - _MoveHorizontalStep;
 
-        if (list->Entity->Position->Column > max)
-            max = list->Entity->Position->Column;
+        if (list->Entity->Position->Column + _MoveHorizontalStep > max)
+            max = list->Entity->Position->Column + _MoveHorizontalStep;
 
         list = list->Next;    
         if (i++ > _InvaderPerRow)
             break;
     }
 
-    if (min == 1 && invaderDirection == true)
+    if (min <= 1 && invaderDirection == true)
     {
         invaderDirection = !invaderDirection;
         bounceCounter++;
     }
-    if (max == COLS && invaderDirection == false)
+    if (max >= COLS && invaderDirection == false)
     {
         invaderDirection = !invaderDirection;
         bounceCounter++;
