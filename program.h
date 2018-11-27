@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <ncurses.h>
 
-#include "invader_ncurses.h"
+#include "program.h"
 #include "InputThread.h"
 #include "List.h"
 #include "Entity.h"
@@ -15,7 +15,7 @@
 // =================== DEFINITIONS =====================
 
 // Settings
-#define _FramesPerSecond 15
+#define _FramesPerSecond 30
 
 // GameElements
 #define _InvaderPerRow 11

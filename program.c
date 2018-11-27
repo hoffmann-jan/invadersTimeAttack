@@ -1,6 +1,6 @@
-#include "invader_ncurses.h"
+#include "program.h"
 #include "InputThread.h"
-#include "Key.h"
+#include "Enums.h"
 
 /* globals */
 // settings
@@ -36,7 +36,7 @@ int main(void)
         key = inputThread->key;
 
         /* 1000000 = 1s */
-        usleep(1000000 / _FramesPerSecond * 3);
+        usleep(1000000 / (_FramesPerSecond));
         frameCounter++;
         
         if((frameCounter % (_FramesPerSecond) == 0)) //nach 1 Sekunde
@@ -71,7 +71,7 @@ void SetUp()
     keypad(stdscr, TRUE);   /* enabel keys like F1, arrowkeys ... */
     noecho();               /* disable input buffer on screen e.g. escape stuff*/
     curs_set(0);            /* disable cursor blinki blinki */
-    //nodelay(stdscr, 1);     /* */
+    //nodelay(stdscr, 1);   /* */
     //srand(time(NULL));
 }
 
