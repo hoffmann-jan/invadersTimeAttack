@@ -94,7 +94,7 @@ void ShowSplashScreen()
     int startRow = fifth * 2;
     int startColumn = ((int) COLS / 2) - 25;
 
-    mvprintw(startRow++, startColumn,     "    ____    ___    _____     ___ ___________  _____");
+    mvprintw(startRow++, startColumn, "    ____    ___    _____     ___ ___________  _____");
     mvprintw(startRow++, startColumn, "   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/");
     mvprintw(startRow++, startColumn, "   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ ");
     mvprintw(startRow++, startColumn, " _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
