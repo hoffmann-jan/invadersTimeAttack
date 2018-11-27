@@ -33,7 +33,7 @@ int main(void)
         Draw();
         
         frameCounter++;
-        if((frameCounter % (_FramesPerSecond / 10) == 0))
+        if((frameCounter % (_FramesPerSecond) == 0))
         {
             MoveInvaders();
             
@@ -41,6 +41,7 @@ int main(void)
         refresh();
     }
 
+    ClearTerminal();
     Dispose();
     return EXIT_SUCCESS;
 }
@@ -79,7 +80,9 @@ void ShowSplashScreen()
     mvprintw(startRow + 2, startColumn, "   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ ");
     mvprintw(startRow + 3, startColumn, " _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
     mvprintw(startRow + 4, startColumn, "/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  ");
+    mvprintw(startRow + 5, startColumn, "lines: %d, cols: %d", LINES, COLS);
     mvprintw(startRow * 3, startColumn + 10, "press any key to start .. ");
+    refresh();
     getch();
 
     /* clear screen */
