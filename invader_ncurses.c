@@ -44,17 +44,11 @@ int main(void)
         }
 
         //obere Rechte ecke Frameinfo
-        move(1,COLS - 10);
-        printw("          ");
-        move(1,COLS - 10);
-        printw("Frame: %d", frameCounter);
-
-        move(2,COLS - 10);
-        printw("          ");
-        move(2,COLS - 10);
-        printw("Key: %d", key);
+        mvprintw(1,COLS - 10, "          ");
+        mvprintw(1,COLS - 10, "Frame: %d", frameCounter);
+        mvprintw(2,COLS - 10, "          ");
+        mvprintw(2,COLS - 10, "Key: %d", key);
         
-
         refresh();
     }
 
@@ -92,7 +86,7 @@ void ShowSplashScreen()
     int startRow = fifth * 2;
     int startColumn = ((int) COLS / 2) - 25;
 
-    mvprintw(startRow++, startColumn, "    ____    ___    _____     ___ ___________  _____");
+    mvprintw(startRow++, startColumn, "    _____   ___    _____    ____  __________  _____");
     mvprintw(startRow++, startColumn, "   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/");
     mvprintw(startRow++, startColumn, "   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ ");
     mvprintw(startRow++, startColumn, " _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
