@@ -3,6 +3,7 @@
 #include "Key.h"
 
 /* globals */
+// settings
 
 // entitys
 struct List *invaders = NULL;
@@ -45,14 +46,14 @@ int main(void)
         }
 
         //obere Rechte ecke Frameinfo
-        move(1,col - 10);
+        move(1,COLS - 10);
         printw("          ");
-        move(1,col - 10);
+        move(1,COLS - 10);
         printw("Frame: %d", frameCounter);
 
-        move(2,col - 10);
+        move(2,COLS - 10);
         printw("          ");
-        move(2,col - 10);
+        move(2,COLS - 10);
         printw("Key: %d", key);
         
 
@@ -73,7 +74,7 @@ void SetUp()
     keypad(stdscr, TRUE);   /* enabel keys like F1, arrowkeys ... */
     noecho();               /* disable input buffer on screen e.g. escape stuff*/
     curs_set(2);            /* disable cursor blinki blinki */
-    // nodelay(stdscr, 1);     /* */
+    //nodelay(stdscr, 1);     /* */
     //srand(time(NULL));
 }
 
