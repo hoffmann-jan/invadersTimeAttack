@@ -37,7 +37,7 @@ int main(void)
         
         Draw(); 
 
-        if((frameCounter % (_FramesPerSecond / 1) == 0)) //nach 1 Sekunde
+        if((frameCounter % (_FramesPerSecond) == 0)) //nach 1 Sekunde
         {
             
             MoveInvaders();    
