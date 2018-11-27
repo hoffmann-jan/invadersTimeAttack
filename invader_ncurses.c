@@ -100,8 +100,8 @@ void ShowSplashScreen()
     mvprintw(startRow + 3, startColumn, " _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
     mvprintw(startRow + 4, startColumn, "/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  ");
     mvprintw(startRow + 5, startColumn, "lines: %d, cols: %d", LINES, COLS);
-    mvprintw(startRow * 3, startColumn + 10, "press any key to start .. ");
-    refresh();
+    mvprintw(fifth * 3, startColumn + 10, "press any key to start .. ");
+    
     getch();
 
     /* clear screen */
