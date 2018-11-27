@@ -4,6 +4,7 @@
 
 /* globals */
 // settings
+// InputThread 
 
 // entitys
 struct List *invaders = NULL;
@@ -35,18 +36,16 @@ int main(void)
         key = inputThread->key;
 
         /* 1000000 = 1s */
-        usleep(1000000 / _FramesPerSecond);
+        usleep(1000000 / _FramesPerSecond * 3);
         frameCounter++;
         
-        
-
         if((frameCounter % (_FramesPerSecond) == 0)) //nach 1 Sekunde
         {
             MoveInvaders();    
-            //frameCounter = 0;
+            frameCounter = 0;
         }
 
-        //obere Rechte ecke Frameinfo
+        //untere linke ecke Frameinfo
         mvprintw(LINES - 4,COLS - 12, "            ");
         mvprintw(LINES - 4,COLS - 12, "l: %d, %d", GetFirstElement(invaders)->Entity->Position->Row, GetFirstElement(invaders)->Entity->Position->Column);
         mvprintw(LINES - 3,COLS - 12, "            ");
@@ -55,7 +54,7 @@ int main(void)
         mvprintw(LINES - 2,COLS - 12, "Frame: %u", frameCounter);
         mvprintw(LINES - 1,COLS - 12, "            ");
         mvprintw(LINES - 1,COLS - 12, "Key: %d", key);
-        
+    
     }
 
     Dispose();
@@ -224,7 +223,7 @@ void MoveInvaders()
                 invaderList->Entity->Position->Column = invaderList->Entity->Position->Column + _MoveHorizontalStep;
             }
             else
-            {
+            {   
                 invaderList->Entity->Position->Column = invaderList->Entity->Position->Column - _MoveHorizontalStep;
             }
         }
