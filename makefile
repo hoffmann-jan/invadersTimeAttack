@@ -3,15 +3,14 @@ all: program
 # all: example
 
 
-program: clean program.c obj/InputThread.o obj/List.o 
-	cc -o bin/program.bin obj/InputThread.o obj/List.o program.c -lncurses -lpthread -O3
-
+program: clean program.c obj/InputThread.o obj/List.o obj/Invader.o
+	cc -o bin/program.bin obj/InputThread.o obj/List.o obj/Invader.o program.c -lncurses -lpthread -O3
 
 old: clean obj/invader.o  obj/List.o obj/InputThread.o	
 	cc -o bin/prog.bin obj/invader.o obj/List.o obj/InputThread.o -lpthread
 
-obj/invader.o: invader.c
-	cc -c invader.c -o obj/invader.o
+obj/Invader.o: Invader.c
+	cc -c Invader.c -o obj/Invader.o
 
 obj/List.o: List.c
 	cc -c List.c -o obj/List.o

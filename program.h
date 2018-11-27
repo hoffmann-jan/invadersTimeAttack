@@ -51,7 +51,8 @@ void ShowSplashScreen();
 int ShowGameOverScreen();
 int PrintSplashScreen(char ** image, int imageLength, char ** message, int messageLength);
 void Draw();
-void PrintEntity();
+void DrawInvaders(struct Invader * arr);
+void PrintInvader();
 void BuildShields();
 
 /* game logic*/

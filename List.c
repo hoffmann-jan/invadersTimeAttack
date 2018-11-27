@@ -3,8 +3,8 @@
 #include <stdbool.h>
 
 #include "List.h"
-#include "Entity.h"
 #include "Position.h"
+#include "Invader.h"
 
 struct List* AddElement(struct List *ListElement, struct List *newElement)
 {
@@ -89,12 +89,12 @@ struct List* RemoveAndDestroyElement(struct List *removeElement)
 struct List* AllocFullListElement()
 {
   struct List * listElement = (struct List*)malloc( sizeof(struct List));
-  struct Entity *entity =  (struct Entity*)malloc( sizeof(struct Entity));
+  struct Invader *invader =  (struct Invader*)malloc( sizeof(struct Invader));
   struct Position *position =  (struct Position*)malloc( sizeof(struct Position));
 
   /* link */
-  listElement->Entity = entity;
-  listElement->Entity->Position = position;
+  listElement->Invader = invader;
+  listElement->Invader->Position = position;
 
   return listElement;
 }

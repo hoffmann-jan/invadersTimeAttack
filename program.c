@@ -5,7 +5,8 @@
 // InputThread 
 
 // entitys
-struct List *invaders = NULL;
+// struct List *invaders = NULL;
+
 bool invaderDirection = false;
 bool invaderMoveForwart = false;
 int bounceCounter = 1;
@@ -14,7 +15,7 @@ unsigned long long frameCounter = 0;
 
 int main(void)
 {    
-    /* start Inputthread, special thanks to jsmolka for support <3 */
+    /* start Inputthread, special thanks to j.smolka for support <3 */
     InputThread *inputThread = threadAlloc();
     threadStart(inputThread);
     int key = 0;
@@ -43,6 +44,9 @@ int main(void)
     while (i < (_InvaderPerRow * _InvaderRowCount))
     {
         struct Position invaderPosition;
+        int lRow = i / _InvaderPerRow;
+        int lCol = i % _InvaderPerRow;
+       
         invaderPosition.Column = 0;
         invaderPosition.Row = 0;
         invaders[i].Position = &invaderPosition;
@@ -62,8 +66,13 @@ int main(void)
     /* GAMELOOP */
     while(true)
     {
-        Draw(); 
-        refresh();
+        // DrawInvaders(invaders); 
+        // refresh();
+        
+        printw("first invader pos->Row: %d", invaders[0].Position->Row);
+        
+        getch(); //DEBUG_ HOLD
+
 
         if(key == KEY_ESC) break;
         key = inputThread->key;
@@ -72,17 +81,17 @@ int main(void)
         usleep(1000000 / (_FramesPerSecond));
         frameCounter++;
         
-        if((frameCounter % (_FramesPerSecond) == 0)) //nach 1 Sekunde
+        if((frameCounter % (_FramesPerSecond) == 0)) //nach _FramesPerSecond Frames
         {
-            MoveInvaders();    
+            // MoveInvaders();    
             frameCounter = 0;
         }
 
-        //untere linke ecke Frameinfo
+        //untere rechte ecke Frameinfo
         mvprintw(LINES - 4,COLS - 12, "            ");
-        mvprintw(LINES - 4,COLS - 12, "l: %d, %d", GetFirstElement(invaders)->Entity->Position->Row, GetFirstElement(invaders)->Entity->Position->Column);
+        mvprintw(LINES - 4,COLS - 12, "l: %d, %d", invaders[0].Position->Row, invaders[0].Position->Column);
         mvprintw(LINES - 3,COLS - 12, "            ");
-        mvprintw(LINES - 3,COLS - 12, "r: %d, %d", GetLastElement(invaders)->Entity->Position->Row, GetLastElement(invaders)->Entity->Position->Column);
+        mvprintw(LINES - 3,COLS - 12, "r: %d, %d", invaders[_InvaderPerRow * _InvaderRowCount].Position->Row, invaders[_InvaderPerRow * _InvaderRowCount].Position->Column);
         mvprintw(LINES - 2,COLS - 12, "            ");
         mvprintw(LINES - 2,COLS - 12, "Frame: %u", frameCounter);
         mvprintw(LINES - 1,COLS - 12, "            ");
@@ -134,37 +143,30 @@ void ShowSplashScreen()
     
     getch();
 
-    // /* clear screen */
+    /* clear screen */
     ClearTerminal();
 }
 
 /* ================================================================================================================= */
 /* ====================================================== DRAW ===================================================== */
 /* ================================================================================================================= */
-void Draw()
+void DrawInvaders(struct Invader * invaders) 
 {
     /*draw invaders*/
-    struct List *invaderList = (struct List *)GetFirstElement(invaders);
-    if(invaderList != NULL) 
+    // struct List *invaderList = (struct List *)GetFirstElement(invaders);
+    int i = 0;
+    for(; i < ((int)(sizeof(invaders) / sizeof(struct Invader))); i++)
     {
-        while (invaderList->Next != NULL)
-        {
-            PrintEntity(invaderList);
-
-            if (invaderList->Next == NULL) 
-                break;
-
-            invaderList = invaderList->Next;
-        }
-    }
+        PrintInvader(invaders[i]);
+    } 
 }
 
-void PrintEntity(struct List *object)
+void PrintInvader(struct Invader *invader)
 {
-    if (object->Entity->SymbolSwitch)
-        mvaddch(object->Entity->Position->Row, object->Entity->Position->Column, object->Entity->SymbolOne);
+    if (invader->SymbolSwitch)
+        mvaddch(invader->Position->Row, invader->Position->Column, invader->SymbolOne);
     else
-        mvaddch(object->Entity->Position->Row, object->Entity->Position->Column, object->Entity->SymbolOne);
+        mvaddch(invader->Position->Row, invader->Position->Column, invader->SymbolTwo);
 }
 
 void DeleteChar(struct Position *pos)
@@ -175,32 +177,18 @@ void DeleteChar(struct Position *pos)
 /* ================================================================================================================= */
 /* ====================================================== LOGIC ==================================================== */
 /* ================================================================================================================= */
-void Initialize()
+void Initialize(struct Invader *invaders)
 {
-    /* create invaders */
-    while ( GetListCount(invaders) < (_InvaderPerRow * _InvaderRowCount) )
-    {
-        /* allocate invader */
-        struct List * listElement = (struct List *)AllocFullListElement();
+//     /* create invaders */
+//     int i = 0;
+//     for(; i < ((int)(sizeof(invaders) / sizeof(struct Invader))); i++)
+//     {
+//         int lRow = i / _InvaderPerRow;
+//         int lCol = i % _InvaderPerRow;
 
-        /* set properties */
-        if (invaders == NULL)
-        {
-            GetNextPosition(NULL, listElement->Entity->Position, GetListCount(invaders));
-        }
-        else
-        {
-            GetNextPosition(GetLastElement(invaders)->Entity->Position, listElement->Entity->Position, GetListCount(invaders));
-        }
-
-        listElement->Entity->SymbolOne = _InvaderAppearence;
-        listElement->Entity->SymbolTwo = _InvaderAppearenceTwo;
-        listElement->Entity->SymbolSwitch = false;
-
-        /* add to List */
-        invaders = (struct List *)AddElement(invaders, listElement);
-    }
-
+//         invaders[i].Position->Column = lCol;
+//         invaders[i].Position->Row = lRow;
+//     } 
 }
 
 void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount)
@@ -230,76 +218,79 @@ void GetNextPosition(struct Position *lastPosition, struct Position *newPosition
 
 void MoveInvaders()
 {
-    struct List *invaderList = (struct List *)GetFirstElement(invaders);
+ 
+    
+    // struct List *invaderList = (struct List *)GetFirstElement(invaders);
 
-    /* check direction */
-    ValidateInvaderDirection();   
+    // /* check direction */
+    // ValidateInvaderDirection();   
 
-    while (invaderList != NULL)
-    {
-        invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
-        /* delete old position */
-        DeleteChar(invaderList->Entity->Position);
+    // while (invaderList != NULL)
+    // {
+    //     invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
+    //     /* delete old position */
+    //     DeleteChar(invaderList->Entity->Position);
 
-        /* move */
-        if (invaderMoveForwart)
-        {
-            invaderList->Entity->Position->Row++;
-            invaderList->Entity->SymbolSwitch = false;
-        }
-        else
-        {
-            if (!invaderDirection) /* true, left; flase, right */
-            {
-                invaderList->Entity->Position->Column = invaderList->Entity->Position->Column + _MoveHorizontalStep;
-            }
-            else
-            {   
-                invaderList->Entity->Position->Column = invaderList->Entity->Position->Column - _MoveHorizontalStep;
-            }
-        }
+    //     /* move */
+    //     if (invaderMoveForwart)
+    //     {
+    //         invaderList->Entity->Position->Row++;
+    //         invaderList->Entity->SymbolSwitch = false;
+    //     }
+    //     else
+    //     {
+    //         if (!invaderDirection) /* true, left; flase, right */
+    //         {
+    //             invaderList->Entity->Position->Column = invaderList->Entity->Position->Column + _MoveHorizontalStep;
+    //         }
+    //         else
+    //         {   
+    //             invaderList->Entity->Position->Column = invaderList->Entity->Position->Column - _MoveHorizontalStep;
+    //         }
+    //     }
 
-        /* switch Symbols */
-        invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
+    //     /* switch Symbols */
+    //     invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
 
-        /* next */
-        invaderList = invaderList->Next;
-    }
-    invaderMoveForwart = false;
+    //     /* next */
+    //     invaderList = invaderList->Next;
+    // }
+    // invaderMoveForwart = false;
 }
 
 void ValidateInvaderDirection()
 {
-    struct List *list = (struct List *)GetFirstElement(invaders);
 
-    if (list == NULL)
-        return;
+    // struct List *list = (struct List *)GetFirstElement(invaders);
 
-    int min = list->Entity->Position->Column - _MoveHorizontalStep;
-    int max = list->Entity->Position->Column + _MoveHorizontalStep;
+    // if (list == NULL)
+    //     return;
 
-    int i = 1;
-    while (list != NULL)
-    {
-        if (list->Entity->Position->Column - _MoveHorizontalStep < min)
-            min = list->Entity->Position->Column - _MoveHorizontalStep;
+    // int min = list->Entity->Position->Column - _MoveHorizontalStep;
+    // int max = list->Entity->Position->Column + _MoveHorizontalStep;
 
-        if (list->Entity->Position->Column + _MoveHorizontalStep > max)
-            max = list->Entity->Position->Column + _MoveHorizontalStep;
+    // int i = 1;
+    // while (list != NULL)
+    // {
+    //     if (list->Entity->Position->Column - _MoveHorizontalStep < min)
+    //         min = list->Entity->Position->Column - _MoveHorizontalStep;
 
-        list = list->Next;    
-        if (i++ > _InvaderPerRow)
-            break;
-    }
+    //     if (list->Entity->Position->Column + _MoveHorizontalStep > max)
+    //         max = list->Entity->Position->Column + _MoveHorizontalStep;
 
-    if (min <= 1 && invaderDirection == true)
-    {
-        invaderDirection = !invaderDirection;
-        bounceCounter++;
-    }
-    if (max >= COLS && invaderDirection == false)
-    {
-        invaderDirection = !invaderDirection;
-        bounceCounter++;
-    }
+    //     list = list->Next;    
+    //     if (i++ > _InvaderPerRow)
+    //         break;
+    // }
+
+    // if (min <= 1 && invaderDirection == true)
+    // {
+    //     invaderDirection = !invaderDirection;
+    //     bounceCounter++;
+    // }
+    // if (max >= COLS && invaderDirection == false)
+    // {
+    //     invaderDirection = !invaderDirection;
+    //     bounceCounter++;
+    // }
 }
