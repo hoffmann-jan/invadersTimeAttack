@@ -1,19 +1,17 @@
-#include "stdbool.h"
 #include "Enums.h"
 
-#ifndef INVADER_H
-#define INVADER_H
+#ifndef SHIELD_H
+#define SHIELD_H
 
-struct Invader
+struct Shield
 {
   struct Position *Position;
   char SymbolOne;
   char SymbolTwo;
   char SymbolThree;
   char SymbolFour;
-  bool Health;
+  int Health;
   Symbol SymbolSwitch;
-  Direction Direction;
 };
 
 #endif
