@@ -1,5 +1,6 @@
 #include "invader_ncurses.h"
 #include "InputThread.h"
+#include "Key.h"
 
 /* globals */
 // settings
@@ -24,28 +25,45 @@ int main(void)
     /* starte Inputthread , danke an Julian für den support <3 */
     InputThread *inputThread = threadAlloc();
     threadStart(inputThread);
-    int key;
+    int key = 0;
+
 
     SetUp();                    // prepare tec - spezifics
     ShowSplashScreen();
-
     Initialize();               // prepare entity's and initial draw
 
     /* GAMELOOP */
     while(true)
     {
-        if(inputThread->key == 27) break;
+        if(key == KEY_ESC) break;
+        key = inputThread->key;
 
         /* 1000000 = 1s */
         usleep(1000000 / _FramesPerSecond);
-        Draw();
-        
         frameCounter++;
-        if((frameCounter % (_FramesPerSecond / 10) == 0))
+        
+        Draw(); 
+
+        if((frameCounter % (_FramesPerSecond / 1) == 0)) //nach 1 Sekunde
         {
-            MoveInvaders();
+            
+            MoveInvaders();    
+            //frameCounter = 0;
             
         }
+
+        //obere Rechte ecke Frameinfo
+        move(1,col - 10);
+        printw("          ");
+        move(1,col - 10);
+        printw("Frame: %d", frameCounter);
+
+        move(2,col - 10);
+        printw("          ");
+        move(2,col - 10);
+        printw("Key: %d", key);
+        
+
         refresh();
     }
 
