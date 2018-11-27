@@ -50,6 +50,3 @@ void MoveInvaders();
 void ValidateInvaderDirection();
 
 #endif
-
-
-

@@ -138,4 +138,3 @@ int GetListCount(struct List *ListElement)
 
   return count;
 }
-
