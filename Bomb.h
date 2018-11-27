@@ -4,7 +4,7 @@
 #ifndef BOMB_H
 #define BOMB_H
 
-struct Projectile
+struct Bomb
 {
   struct Position *Position;
   char Symbol;

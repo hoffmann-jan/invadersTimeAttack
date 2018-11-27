@@ -1,6 +1,4 @@
 #include "program.h"
-#include "InputThread.h"
-#include "Enums.h"
 
 /* globals */
 // settings
@@ -16,15 +14,50 @@ unsigned long long frameCounter = 0;
 
 int main(void)
 {    
-    /* starte Inputthread , danke an Julian für den support <3 */
+    /* start Inputthread, special thanks to jsmolka for support <3 */
     InputThread *inputThread = threadAlloc();
     threadStart(inputThread);
     int key = 0;
 
-
     SetUp();                    // prepare tec - spezifics
     ShowSplashScreen();
     Initialize();               // prepare entity's and initial draw
+
+    struct Player player;
+    struct Invader invaders[_InvaderPerRow * _InvaderRowCount];
+    struct Projectile projectiles[_MaximumProjectiles];
+    struct Bomb bombs[_MaximumBombs];
+    struct Shield shields[100]; 
+
+    /* init player */
+    struct Position playerPosition;
+    playerPosition.Column = 0;
+    playerPosition.Row = 0;
+    player.Health = 3;
+    player.Score = 0;
+    player.Symbol = _PlayerAppearence;
+    player.Position = &playerPosition;
+
+    /* init invaders */
+    int i = 0;
+    while (i < (_InvaderPerRow * _InvaderRowCount))
+    {
+        struct Position invaderPosition;
+        invaderPosition.Column = 0;
+        invaderPosition.Row = 0;
+        invaders[i].Position = &invaderPosition;
+        invaders[i].Health = true;
+        invaders[i].Direction = DOWN;
+        invaders[i].SymbolOne = _InvaderAppearence;
+        invaders[i].SymbolTwo = _InvaderAppearenceTwo;
+        invaders[i].SymbolThree = _InvaderAppearenceThree;
+        invaders[i].SymbolFour = _InvaderAppearenceFour;
+        invaders[i].SymbolSwitch = ONE;
+        i++;
+    }
+
+    /**/
+    /**/
 
     /* GAMELOOP */
     while(true)

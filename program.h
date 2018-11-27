@@ -6,11 +6,14 @@
 #include <unistd.h>
 #include <ncurses.h>
 
-#include "program.h"
 #include "InputThread.h"
-#include "List.h"
-#include "Entity.h"
 #include "Position.h"
+#include "Projectile.h"
+#include "Player.h"
+#include "Bomb.h"
+#include "Shield.h"
+#include "Invader.h"
+#include "Enums.h"
 
 // =================== DEFINITIONS =====================
 
@@ -20,14 +23,17 @@
 // GameElements
 #define _InvaderPerRow 11
 #define _InvaderRowCount 5
+#define _PlayerAppearence '^'
 #define _InvaderAppearence 'X'
 #define _InvaderAppearenceTwo 'V'
 #define _InvaderAppearenceThree 'W'
 #define _InvaderAppearenceFour 'w'
 #define _InvaderHorizontalSpace 5
 #define _InvaderVerticalSpace 2
-#define _InvaderFirstRow 2
-#define _InvaderFirstColumn 2
+#define _InvaderFirstRow 1
+#define _InvaderFirstColumn 1
+#define _MaximumBombs 100
+#define _MaximumProjectiles 20
 
 #define _MoveHorizontalStep 2
 // 
@@ -42,6 +48,8 @@ void SetUp();
 
 /* draw support */
 void ShowSplashScreen();
+int ShowGameOverScreen();
+int PrintSplashScreen(char ** image, int imageLength, char ** message, int messageLength);
 void Draw();
 void PrintEntity();
 void BuildShields();
