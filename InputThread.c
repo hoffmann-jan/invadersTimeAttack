@@ -34,6 +34,7 @@ static void *threadFunction(void *arg)
         }
         usleep(5000); //reduziere prozessorlast
     }
+    return this;
 }
 
 void threadStart(InputThread *thread)
