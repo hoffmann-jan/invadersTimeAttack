@@ -5,7 +5,7 @@
 // InputThread 
 
 // entitys
-struct Invader invaders[_InvaderPerRow * _InvaderRowCount];
+// struct Invader invaders[_InvaderPerRow * _InvaderRowCount];
 
 
 // 
@@ -116,11 +116,6 @@ void SetUp()
 
 void Dispose()
 {
-    int i = 0;
-    for(; i < ((int)(sizeof(invaders) / sizeof(struct Invader))); i++)
-    {
-        free(invaders[i].Position);
-    }
     //ncurse release
     refresh();
     endwin();              /* stop ncurses mode IMPORTANT! ;D*/
