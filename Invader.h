@@ -1,10 +1,10 @@
-#include "stdbool.h"
+#include <stdbool.h>
 #include "Enums.h"
 
 #ifndef INVADER_H
 #define INVADER_H
 
-struct Invader
+typedef struct Invader
 {
   struct Position *Position;
   char SymbolOne;
@@ -14,6 +14,6 @@ struct Invader
   bool Health;
   Symbol SymbolSwitch;
   Direction Direction;
-};
+} Invader;
 
 #endif

@@ -2,6 +2,8 @@ all: program
 # all: old
 # all: example
 
+debug: clean program.c obj/InputThread.o obj/List.o obj/Invader.o
+	cc -g -o bin/program.bin obj/InputThread.o obj/List.o obj/Invader.o program.c -lncurses -lpthread
 
 program: clean program.c obj/InputThread.o obj/List.o obj/Invader.o
 	cc -o bin/program.bin obj/InputThread.o obj/List.o obj/Invader.o program.c -lncurses -lpthread -O3

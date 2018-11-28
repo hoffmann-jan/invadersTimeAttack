@@ -5,8 +5,10 @@
 // InputThread 
 
 // entitys
-// struct List *invaders = NULL;
+struct Invader invaders[_InvaderPerRow * _InvaderRowCount];
 
+
+// 
 bool invaderDirection = false;
 bool invaderMoveForwart = false;
 int bounceCounter = 1;
@@ -25,13 +27,13 @@ int main(void)
     Initialize();               // prepare entity's and initial draw
 
     struct Player player;
-    struct Invader invaders[_InvaderPerRow * _InvaderRowCount];
+    Invader invaders[_InvaderPerRow * _InvaderRowCount];
     struct Projectile projectiles[_MaximumProjectiles];
     struct Bomb bombs[_MaximumBombs];
     struct Shield shields[100]; 
 
     /* init player */
-    struct Position playerPosition;
+    Position playerPosition;
     playerPosition.Column = 0;
     playerPosition.Row = 0;
     player.Health = 3;
@@ -43,13 +45,12 @@ int main(void)
     int i = 0;
     while (i < (_InvaderPerRow * _InvaderRowCount))
     {
-        struct Position invaderPosition;
-        int lRow = i / _InvaderPerRow;
-        int lCol = i % _InvaderPerRow;
-       
-        invaderPosition.Column = 0;
-        invaderPosition.Row = 0;
-        invaders[i].Position = &invaderPosition;
+        Position * invaderPosition = (Position *)malloc(sizeof(Position));
+
+        invaderPosition->Column = i / _InvaderPerRow;
+        invaderPosition->Row = i % _InvaderPerRow;
+        invaders[i].Position = invaderPosition;
+
         invaders[i].Health = true;
         invaders[i].Direction = DOWN;
         invaders[i].SymbolOne = _InvaderAppearence;
@@ -58,6 +59,7 @@ int main(void)
         invaders[i].SymbolFour = _InvaderAppearenceFour;
         invaders[i].SymbolSwitch = ONE;
         i++;
+
     }
 
     /**/
@@ -66,14 +68,9 @@ int main(void)
     /* GAMELOOP */
     while(true)
     {
-        // DrawInvaders(invaders); 
-        // refresh();
+        DrawInvaders(invaders); 
+        refresh();
         
-        printw("first invader pos->Row: %d", invaders[0].Position->Row);
-        
-        getch(); //DEBUG_ HOLD
-
-
         if(key == KEY_ESC) break;
         key = inputThread->key;
 
@@ -91,12 +88,12 @@ int main(void)
         mvprintw(LINES - 4,COLS - 12, "            ");
         mvprintw(LINES - 4,COLS - 12, "l: %d, %d", invaders[0].Position->Row, invaders[0].Position->Column);
         mvprintw(LINES - 3,COLS - 12, "            ");
-        mvprintw(LINES - 3,COLS - 12, "r: %d, %d", invaders[_InvaderPerRow * _InvaderRowCount].Position->Row, invaders[_InvaderPerRow * _InvaderRowCount].Position->Column);
+        mvprintw(LINES - 3,COLS - 12, "r: %d, %d", invaders[(_InvaderPerRow * _InvaderRowCount) - 1].Position->Row, invaders[(_InvaderPerRow * _InvaderRowCount) - 1].Position->Column);
         mvprintw(LINES - 2,COLS - 12, "            ");
         mvprintw(LINES - 2,COLS - 12, "Frame: %u", frameCounter);
         mvprintw(LINES - 1,COLS - 12, "            ");
         mvprintw(LINES - 1,COLS - 12, "Key: %d", key);
-    
+            
     }
 
     Dispose();
@@ -119,6 +116,11 @@ void SetUp()
 
 void Dispose()
 {
+    int i = 0;
+    for(; i < ((int)(sizeof(invaders) / sizeof(struct Invader))); i++)
+    {
+        free(invaders[i].Position);
+    }
     //ncurse release
     refresh();
     endwin();              /* stop ncurses mode IMPORTANT! ;D*/
@@ -150,23 +152,19 @@ void ShowSplashScreen()
 /* ================================================================================================================= */
 /* ====================================================== DRAW ===================================================== */
 /* ================================================================================================================= */
-void DrawInvaders(struct Invader * invaders) 
+void DrawInvaders(Invader *invaders) 
 {
     /*draw invaders*/
-    // struct List *invaderList = (struct List *)GetFirstElement(invaders);
     int i = 0;
-    for(; i < ((int)(sizeof(invaders) / sizeof(struct Invader))); i++)
+    while (i < (_InvaderPerRow * _InvaderRowCount))
     {
-        PrintInvader(invaders[i]);
-    } 
-}
-
-void PrintInvader(struct Invader *invader)
-{
-    if (invader->SymbolSwitch)
-        mvaddch(invader->Position->Row, invader->Position->Column, invader->SymbolOne);
-    else
-        mvaddch(invader->Position->Row, invader->Position->Column, invader->SymbolTwo);
+        if (invaders[i].SymbolSwitch)
+            mvaddch(invaders[i].Position->Row, invaders[i].Position->Column, invaders[i].SymbolOne);
+        else
+            mvaddch(invaders[i].Position->Row, invaders[i].Position->Column, invaders[i].SymbolTwo);
+        
+        i++;
+    }
 }
 
 void DeleteChar(struct Position *pos)
@@ -191,7 +189,7 @@ void Initialize(struct Invader *invaders)
 //     } 
 }
 
-void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount)
+void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount)
 {
     /* first invader */
     if (lastPosition == NULL)
