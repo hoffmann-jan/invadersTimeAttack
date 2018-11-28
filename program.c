@@ -46,9 +46,12 @@ int main(void)
     while (i < (_InvaderPerRow * _InvaderRowCount))
     {
         Position * invaderPosition = (Position *)malloc(sizeof(Position));
+        
+        int row = i % _InvaderPerRow;
+        int col = i / _InvaderPerRow;
 
-        invaderPosition->Column = i / _InvaderPerRow;
-        invaderPosition->Row = i % _InvaderPerRow;
+        invaderPosition->Column = _InvaderFirstRow + row + ( row * _InvaderHorizontalSpace);
+        invaderPosition->Row = _InvaderFirstColumn + col + (col * _InvaderVerticalSpace);
         invaders[i].Position = invaderPosition;
 
         invaders[i].Health = true;
@@ -59,7 +62,6 @@ int main(void)
         invaders[i].SymbolFour = _InvaderAppearenceFour;
         invaders[i].SymbolSwitch = ONE;
         i++;
-
     }
 
     /**/
@@ -80,7 +82,7 @@ int main(void)
         
         if((frameCounter % (_FramesPerSecond) == 0)) //nach _FramesPerSecond Frames
         {
-            // MoveInvaders();    
+            MoveInvaders(invaders);    
             frameCounter = 0;
         }
 
@@ -170,18 +172,8 @@ void DeleteChar(struct Position *pos)
 /* ================================================================================================================= */
 /* ====================================================== LOGIC ==================================================== */
 /* ================================================================================================================= */
-void Initialize(struct Invader *invaders)
+void Initialize(Invader *invaders)
 {
-//     /* create invaders */
-//     int i = 0;
-//     for(; i < ((int)(sizeof(invaders) / sizeof(struct Invader))); i++)
-//     {
-//         int lRow = i / _InvaderPerRow;
-//         int lCol = i % _InvaderPerRow;
-
-//         invaders[i].Position->Column = lCol;
-//         invaders[i].Position->Row = lRow;
-//     } 
 }
 
 void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount)
@@ -209,14 +201,10 @@ void GetNextPosition(Position *lastPosition, Position *newPosition, int listCoun
     }
 }
 
-void MoveInvaders()
-{
- 
-    
-    // struct List *invaderList = (struct List *)GetFirstElement(invaders);
-
+void MoveInvaders(Invader *invaders)
+{    
     // /* check direction */
-    // ValidateInvaderDirection();   
+    // ValidateInvaderDirection(invaders);   
 
     // while (invaderList != NULL)
     // {
@@ -251,9 +239,8 @@ void MoveInvaders()
     // invaderMoveForwart = false;
 }
 
-void ValidateInvaderDirection()
+void ValidateInvaderDirection(Invader *invaders)
 {
-
     // struct List *list = (struct List *)GetFirstElement(invaders);
 
     // if (list == NULL)
