@@ -58,19 +58,19 @@ void ShowSplashScreen();
 int ShowGameOverScreen();
 int PrintSplashScreen(char ** image, int imageLength, char ** message, int messageLength);
 void Draw();
-void DrawInvaders(Invader *);
+void DrawInvaders(Invader []);
 void DrawScore();
 void BuildShields();
 void DrawPlayer();
 
 /* game logic*/
-void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount);
-void MoveInvaders(Invader *invader);
-void MoveProjectiles();
-void Shoot();
-void ValidateInvaderDirection(Invader *invader);
+void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount);
+void MoveInvaders(Invader invader[]);
+void MoveProjectiles(Projectile projectiles[]);
+void Shoot(Projectile projectiles[]);
+void ValidateInvaderDirection(Invader invader[]);
 void IncrementScore(int value);
 void DealShieldDamage(Shield shield);
-void DetectCollision();
+void DetectCollision(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
 
 #endif

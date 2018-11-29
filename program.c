@@ -6,7 +6,7 @@ unsigned long long frameCounter = 0;
 
 int main(void)
 {    
-    /* start Inputthread, special thanks to j.smolka for support <3 */
+    /* start InputThread, special thanks to j.smolka for support <3 */
     InputThread *inputThread = threadAlloc();
     threadStart(inputThread);
     int key = 0;
@@ -98,6 +98,7 @@ int main(void)
     /* GAMELOOP */
     while(true)
     {
+        DetectCollision(player, invaders, projectiles, bombs, shields);
         DrawInvaders(invaders); 
         DrawPlayer(player);
         refresh();
@@ -122,7 +123,7 @@ int main(void)
         }
         else if (key == KEY_Space)
         {
-            
+            Shoot(projectiles);
         }
 
         /* 1000000 = 1s */
@@ -203,7 +204,7 @@ void ShowSplashScreen()
 /* ================================================================================================================= */
 /* ====================================================== DRAW ===================================================== */
 /* ================================================================================================================= */
-void DrawInvaders(Invader *invaders) 
+void DrawInvaders(Invader invaders[]) 
 {
     int i = 0;
     while (i < (_InvaderPerRow * _InvaderRowCount))
@@ -266,7 +267,7 @@ void GetNextPosition(Position *lastPosition, Position *newPosition, int listCoun
     }
 }
 
-void MoveInvaders(Invader *invader)
+void MoveInvaders(Invader invader[])
 {    
     /* check and set direction */
     ValidateInvaderDirection(invader);   
@@ -315,7 +316,7 @@ void MoveInvaders(Invader *invader)
     }
 }
 
-void ValidateInvaderDirection(Invader *invader)
+void ValidateInvaderDirection(Invader invader[])
 {
     int min = invader[0].Position->Column - _MoveHorizontalStep;
     int max = invader[0].Position->Column + _MoveHorizontalStep;
@@ -369,7 +370,7 @@ void ValidateInvaderDirection(Invader *invader)
 
 }
 
-void Shoot()
+void Shoot(Projectile projectiles[])
 {
 //   struct List * projectile = (struct List *)AllocFullListElement();
 
@@ -383,7 +384,7 @@ void Shoot()
 //   projectiles = (struct List *)AddElement(projectiles, projectile);
 }
 
-void MoveProjectiles()
+void MoveProjectiles(Projectile projectiles[])
 {
 //   struct List *projectileList = (struct List *)GetFirstElement(projectiles);
 //   while (projectileList != NULL)
@@ -407,7 +408,7 @@ void MoveProjectiles()
 //   }
 }
 
-void DetectCollision()
+void DetectCollision(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
 {
 //   struct List *projectile = (struct List *)GetFirstElement(projectiles);
 //   struct List *invader = (struct List *)GetFirstElement(invaders);
@@ -461,19 +462,13 @@ void DealShieldDamage(Shield shield)
 //   }
 }
 
-void IncrementScore(int value)
-{
-//   score += value;
-//   DrawScore();
-}
-
-void DrawScore()
+void DrawScore(Player player)
 {
 //   GoToTerminalPosition(terminalSize.ws_row - 2, 1);
 //   printf("<score: %d>", score);
 }
 
-void DrawHealth()
+void DrawHealth(Player player)
 {
 //   GoToTerminalPosition(terminalSize.ws_row - 2, (int) terminalSize.ws_col / 2);
 //   printf("<health: %d>", playerHealth);
