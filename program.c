@@ -1,18 +1,7 @@
 #include "program.h"
 
-/* globals */
-// settings
-// InputThread 
-
-// entitys
-// struct Invader invaders[_InvaderPerRow * _InvaderRowCount];
-
-
-// 
-bool invaderDirection = false;
-bool invaderMoveForwart = false;
 int bounceCounter = 1;
-
+Direction lastDirection = LEFT;
 unsigned long long frameCounter = 0;
 
 int main(void)
@@ -28,12 +17,12 @@ int main(void)
     /* setup vars */
     Player player;
     Invader invaders[_InvaderPerRow * _InvaderRowCount];
-    struct Projectile projectiles[_MaximumProjectiles];
-    struct Bomb bombs[_MaximumBombs];
-    struct Shield shields[_MaximumShields]; 
+    Projectile projectiles[_MaximumProjectiles];
+    Bomb bombs[_MaximumBombs];
+    Shield shields[_MaximumShields]; 
 
     /* init player */
-    Position * playerPosition = (Position *)malloc(sizeof(Position) + 1);;
+    Position * playerPosition = (Position *)malloc(sizeof(Position));;
     playerPosition->Column = COLS / 2;
     playerPosition->Row = LINES - 5;
     player.Health = 3;
@@ -45,7 +34,7 @@ int main(void)
     int i = 0;
     while (i < (_InvaderPerRow * _InvaderRowCount))
     {
-        Position * invaderPosition = (Position *)malloc(sizeof(Position) + 1);
+        Position * invaderPosition = (Position *)malloc(sizeof(Position));
         
         int row = i % _InvaderPerRow;
         int col = i / _InvaderPerRow;
@@ -55,7 +44,7 @@ int main(void)
         invaders[i].Position = invaderPosition;
 
         invaders[i].Health = true;
-        invaders[i].Direction = DOWN;
+        invaders[i].Direction = LEFT;
         invaders[i].SymbolOne = _InvaderAppearence;
         invaders[i].SymbolTwo = _InvaderAppearenceTwo;
         invaders[i].SymbolThree = _InvaderAppearenceThree;
@@ -66,9 +55,9 @@ int main(void)
 
     /* init projectile array */
     i = 0;
-    while (i <= _MaximumProjectiles)
+    while (i < _MaximumProjectiles)
     {
-        Position * projectilePosition = (Position *)malloc(sizeof(Position) + 1);
+        Position * projectilePosition = (Position *)malloc(sizeof(Position));
 
         projectiles[i].Position = projectilePosition;
         projectiles[i].Symbol = _ProjectileAppearence;
@@ -79,14 +68,14 @@ int main(void)
 
     /* init bomb array */
     i = 0;
-    while (i <= _MaximumBombs)
+    while (i < _MaximumBombs)
     {
-        Position * bombPosition = (Position *)malloc(sizeof(Position) + 1);
+        Position * bombPosition = (Position *)malloc(sizeof(Position));
 
-        projectiles[i].Position = bombPosition;
-        projectiles[i].Symbol = _BombAppearence;
-        projectiles[i].Direction = DOWN;
-        projectiles[i].Collision = true;
+        bombs[i].Position = bombPosition;
+        bombs[i].Symbol = _BombAppearence;
+        bombs[i].Direction = DOWN;
+        bombs[i].Collision = true;
         i++;
     }
 
@@ -94,7 +83,7 @@ int main(void)
     i = 0;
     while (i <= _MaximumShields)
     {
-        Position * shieldPosition = (Position *)malloc(sizeof(Position) + 1);
+        Position * shieldPosition = (Position *)malloc(sizeof(Position));
 
         shields[i].Position = shieldPosition;
         shields[i].SymbolOne = _ShieldAppearence;
@@ -306,25 +295,24 @@ void MoveInvaders(Invader *invader)
         DeleteChar(invader[i].Position);
 
         /* move */
-        if (invaderMoveForwart)
+        switch (invader[i].Direction)
         {
-            invader[i].Position->Row++;
-        }
-        else
-        {
-            if (!invaderDirection) /* true, left; flase, right */
-            {
-                invader[i].Position->Column = invader[i].Position->Column + _MoveHorizontalStep;
-            }
-            else
-            {   
+            case LEFT:
                 invader[i].Position->Column = invader[i].Position->Column - _MoveHorizontalStep;
-            }
+                break;
+            case RIGTH:
+                invader[i].Position->Column = invader[i].Position->Column + _MoveHorizontalStep;
+                break;
+            case DOWN:
+                invader[i].Position->Row++;
+                invader[i].Direction = LEFT;
+            break;
+            default:
+                break;
         }
+        
         i++;
     }
-
-    invaderMoveForwart = false;
 }
 
 void ValidateInvaderDirection(Invader *invader)
@@ -335,6 +323,12 @@ void ValidateInvaderDirection(Invader *invader)
     int i = 0;
     while (i < (_InvaderPerRow * _InvaderRowCount))
     {
+        if (invader[i].Direction == DOWN)
+            invader[i].Direction = lastDirection;
+        else
+            lastDirection = invader[i].Direction;
+
+
         if (invader[i].Position->Column - _MoveHorizontalStep < min)
             min = invader[i].Position->Column - _MoveHorizontalStep;
 
@@ -346,22 +340,33 @@ void ValidateInvaderDirection(Invader *invader)
         i++;
     }
 
-    if (min <= 1 && invaderDirection == true)
+    if ((min <= 1 && invader[i].Direction == LEFT)
+    || (max >= COLS && invader[i].Direction == RIGTH))
     {
-        invaderDirection = !invaderDirection;
-        bounceCounter++;
-    }
-    if (max >= COLS && invaderDirection == false)
-    {
-        invaderDirection = !invaderDirection;
         bounceCounter++;
     }
 
-    if (bounceCounter >= 3)
+    i = 0;
+    while (i < (_InvaderPerRow * _InvaderRowCount))
     {
-        invaderMoveForwart = true;
-        bounceCounter = 1;
+        if (min <= 1 && invader[i].Direction == LEFT)
+        {
+            invader[i].Direction = RIGTH;
+        }
+        if (max >= COLS && invader[i].Direction == RIGTH)
+        {
+            invader[i].Direction = LEFT;
+        }
+
+        if (bounceCounter >= 3)
+        {
+            invader[i].Direction = DOWN;
+        }
+        i++;
     }
+    if (bounceCounter >= 3)    
+        bounceCounter = 1;
+
 }
 
 void Shoot()
