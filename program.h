@@ -53,6 +53,7 @@ int PrintSplashScreen(char ** image, int imageLength, char ** message, int messa
 void Draw();
 void DrawInvaders(Invader *);
 void BuildShields();
+void DrawPlayer();
 
 /* game logic*/
 void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount);

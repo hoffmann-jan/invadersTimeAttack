@@ -26,7 +26,7 @@ int main(void)
     ShowSplashScreen();
     Initialize();               // prepare entity's and initial draw
 
-    struct Player player;
+    Player player;
     Invader invaders[_InvaderPerRow * _InvaderRowCount];
     struct Projectile projectiles[_MaximumProjectiles];
     struct Bomb bombs[_MaximumBombs];
@@ -34,14 +34,17 @@ int main(void)
 
     /* init player */
     Position playerPosition;
-    playerPosition.Column = 0;
-    playerPosition.Row = 0;
+    playerPosition.Column = COLS / 2;
+    playerPosition.Row = LINES - 5;
     player.Health = 3;
     player.Score = 0;
     player.Symbol = _PlayerAppearence;
     player.Position = &playerPosition;
+    
+    /**/
+    /**/
+    // Initialize(invaders); <- bitte mal in die Methode schauen
 
-    /* init invaders */
     int i = 0;
     while (i < (_InvaderPerRow * _InvaderRowCount))
     {
@@ -64,17 +67,20 @@ int main(void)
         i++;
     }
 
-    /**/
-    /**/
 
     /* GAMELOOP */
     while(true)
     {
         DrawInvaders(invaders); 
+        DrawPlayer(player);
         refresh();
-        
-        if(key == KEY_ESC) break;
+
         key = inputThread->key;
+
+        if (key == KEY_ESC) break;
+        else if (key == KEY_A || key == KEY_a) player.Position->Column--;
+        else if (key == KEY_D || key == KEY_d) player.Position->Column++;
+        key = KEY_NONE;
 
         /* 1000000 = 1s */
         usleep(1000000 / (_FramesPerSecond));
@@ -95,7 +101,7 @@ int main(void)
         mvprintw(LINES - 2,COLS - 12, "Frame: %u", frameCounter);
         mvprintw(LINES - 1,COLS - 12, "            ");
         mvprintw(LINES - 1,COLS - 12, "Key: %d", key);
-            
+        
     }
 
     Dispose();
@@ -164,6 +170,11 @@ void DrawInvaders(Invader *invaders)
     }
 }
 
+void DrawPlayer(Player player)
+{
+    mvaddch(player.Position->Row, player.Position->Column, player.Symbol);
+}
+
 void DeleteChar(struct Position *pos)
 {
     mvaddch(pos->Row, pos->Column, ' ');
@@ -174,6 +185,29 @@ void DeleteChar(struct Position *pos)
 /* ================================================================================================================= */
 void Initialize(Invader *invaders)
 {
+   //initalize hier erzeugt speicherfehler (warruuum? dachte ich übergebe den Zeiger?)
+    /*int i = 0;
+    while (i < (_InvaderPerRow * _InvaderRowCount))
+    {
+        Position * invaderPosition = (Position *)malloc(sizeof(Position));
+        
+        int row = i % _InvaderPerRow;
+        int col = i / _InvaderPerRow;
+
+        invaderPosition->Column = _InvaderFirstRow + row + ( row * _InvaderHorizontalSpace);
+        invaderPosition->Row = _InvaderFirstColumn + col + (col * _InvaderVerticalSpace);
+        invaders[i].Position = invaderPosition;
+
+        invaders[i].Health = true;
+        invaders[i].Direction = DOWN;
+        invaders[i].SymbolOne = _InvaderAppearence;
+        invaders[i].SymbolTwo = _InvaderAppearenceTwo;
+        invaders[i].SymbolThree = _InvaderAppearenceThree;
+        invaders[i].SymbolFour = _InvaderAppearenceFour;
+        invaders[i].SymbolSwitch = ONE;
+        i++;
+    }
+    */
 }
 
 void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount)
