@@ -3,7 +3,7 @@
 #ifndef SHIELD_H
 #define SHIELD_H
 
-struct Shield
+typedef struct Shield
 {
   struct Position *Position;
   char SymbolOne;
@@ -12,6 +12,6 @@ struct Shield
   char SymbolFour;
   int Health;
   Symbol SymbolSwitch;
-};
+} Shield;
 
 #endif
