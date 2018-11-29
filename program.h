@@ -60,17 +60,20 @@ int PrintSplashScreen(char ** image, int imageLength, char ** message, int messa
 void Draw();
 void DrawInvaders(Invader []);
 void DrawScore();
-void BuildShields();
-void DrawPlayer();
+void BuildShields(Shield shield[]);
+void DrawShields(Shield shield[]);
+void DrawPlayer(Player player);
 
 /* game logic*/
 void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount);
 void MoveInvaders(Invader invader[]);
 void MoveProjectiles(Projectile projectiles[]);
-void Shoot(Projectile projectiles[]);
+void Shoot(Projectile projectiles[], Player player);
 void ValidateInvaderDirection(Invader invader[]);
-void IncrementScore(int value);
 void DealShieldDamage(Shield shield);
 void DetectCollision(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
+void DrawScore(Player player);
+void DrawHealth(Player player);
+void DrawProjectiles(Projectile projectiles[]);
 
 #endif

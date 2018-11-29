@@ -81,7 +81,7 @@ int main(void)
 
     /* init shields */
     i = 0;
-    while (i <= _MaximumShields)
+    while (i < _MaximumShields)
     {
         Position * shieldPosition = (Position *)malloc(sizeof(Position));
 
@@ -101,6 +101,10 @@ int main(void)
         DetectCollision(player, invaders, projectiles, bombs, shields);
         DrawInvaders(invaders); 
         DrawPlayer(player);
+        DrawProjectiles(projectiles);
+        DrawScore(player);
+        DrawHealth(player);
+        DrawShields(shields);
         refresh();
 
         key = inputThread->key;
@@ -123,7 +127,7 @@ int main(void)
         }
         else if (key == KEY_Space)
         {
-            Shoot(projectiles);
+            Shoot(projectiles, player);
         }
 
         /* 1000000 = 1s */
@@ -138,7 +142,7 @@ int main(void)
 
         if((frameCounter % ((int)(_FramesPerSecond / 2)) == 0)) // double speed
         {
-            MoveProjectiles(invaders); 
+            MoveProjectiles(projectiles); 
         }
 
         //untere rechte ecke Frameinfo
@@ -223,6 +227,48 @@ void DrawInvaders(Invader invaders[])
             case FOUR:
                 mvaddch(invaders[i].Position->Row, invaders[i].Position->Column, invaders[i].SymbolFour);
                 break;
+        }
+        i++;
+    }
+}
+
+void DrawProjectiles(Projectile projectiles[])
+{
+    int i = 0;
+    while (i < _MaximumProjectiles)
+    {
+        if (projectiles[i].Collision == false)
+            mvaddch(projectiles[i].Position->Row, projectiles[i].Position->Column, projectiles[i].Symbol);
+        i++;
+    }
+}
+
+void DrawShields(Shield shields[])
+{
+    int i = 0;
+    while (i < _MaximumShields)
+    {
+        if (shields[i].Health > 0)
+        {
+            switch (shields[i].SymbolSwitch)
+            {
+                case ONE:
+                    mvaddch(shields[i].Position->Row, shields[i].Position->Column, shields[i].SymbolOne);
+                    break;
+                case TWO:
+                    mvaddch(shields[i].Position->Row, shields[i].Position->Column, shields[i].SymbolTwo);
+                    break;
+                case THREE:
+                    mvaddch(shields[i].Position->Row, shields[i].Position->Column, shields[i].SymbolThree);
+                    break;
+                case FOUR:
+                    mvaddch(shields[i].Position->Row, shields[i].Position->Column, shields[i].SymbolFour);
+                    break;            
+            }
+        }
+        else
+        {
+            mvaddch(shields[i].Position->Row, shields[i].Position->Column, ' ');
         }
         i++;
     }
@@ -370,106 +416,122 @@ void ValidateInvaderDirection(Invader invader[])
 
 }
 
-void Shoot(Projectile projectiles[])
+void Shoot(Projectile projectiles[], Player player)
 {
-//   struct List * projectile = (struct List *)AllocFullListElement();
+    int i = 0;
+    while (i < _MaximumProjectiles)
+    {
+        if (projectiles[i].Collision == true)
+        {
+            projectiles[i].Position->Column = player.Position->Column;
+            projectiles[i].Position->Row = player.Position->Row - 1;
+            projectiles[i].Collision = false;
+            
+            break;
+        }
 
-//   projectile->Entity->Position->Column = playerPosition->Column;
-//   projectile->Entity->Position->Row = playerPosition->Row - 1;
-//   projectile->Entity->SymbolOne = __ProjectileAppearence;
-//   projectile->Entity->SymbolTwo = __ProjectileAppearence;
-//   projectile->Entity->SymbolSwitch = true;
-//   PrintChar(projectile);
-
-//   projectiles = (struct List *)AddElement(projectiles, projectile);
+        i++;
+    }
 }
 
 void MoveProjectiles(Projectile projectiles[])
 {
-//   struct List *projectileList = (struct List *)GetFirstElement(projectiles);
-//   while (projectileList != NULL)
-//   {
-//     DeleteChar(projectileList->Entity->Position);
-//     if (projectileList->Entity->Position->Row <= 1)
-//     {
-//       projectileList = (struct List *)RemoveAndDestroyElement(projectileList);
-//     }
-//     else
-//     {
-//       /* move */
-//       projectileList->Entity->Position->Row--;
+    int i = 0;
+    while (i < _MaximumProjectiles)
+    {
+        if (projectiles[i].Collision == false)
+        {
+            DeleteChar(projectiles[i].Position);
+            projectiles[i].Position->Row--;     
 
-//       /* draw */
-//       PrintChar(projectileList);
-      
-//       /* next */
-//       projectileList = projectileList->Next;
-//     }
-//   }
+            if (projectiles[i].Position->Row < 1)
+                projectiles[i].Collision = true;
+            break;
+        }
+
+        i++;
+    }
 }
 
 void DetectCollision(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
 {
-//   struct List *projectile = (struct List *)GetFirstElement(projectiles);
-//   struct List *invader = (struct List *)GetFirstElement(invaders);
-//   struct List *shield = (struct List *)GetFirstElement(shieldObjects);
+    for(int p = 0; p < _MaximumProjectiles; p++)
+    {
+        if (projectiles[p].Collision == true)
+            continue;
 
-//   while(projectile != NULL)
-//   {
-//     bool hit = false;
-//     /* collision with a shield */
-//     while(shield != NULL)
-//     {
-//       if (shield->Entity->Position->Row == projectile->Entity->Position->Row
-//       && shield->Entity->Position->Column == projectile->Entity->Position->Column)
-//       {
-//         DealShieldDamage(shield);
-//         hit = true;
-//         break;
-//       }
-//       shield = shield->Next;
-//     }
-//     if (hit)
-//     {
-//       projectile = (struct List *)RemoveAndDestroyElement(projectile);
-//       break;
-//     }
-//     /* collision with a invader */
-//     while(invader != NULL)
-//     {
-//       if (invader->Entity->Position->Row == projectile->Entity->Position->Row
-//       && invader->Entity->Position->Column == projectile->Entity->Position->Column)
-//       {
-//         //invader = (struct List *)RemoveAndDestroyElement(invader);
-//         //projectile = (struct List *)RemoveAndDestroyElement(projectile);
-//         IncrementScore(50);
-//         break;
-//       }
-//       invader = invader->Next;
-//     }
-//     projectile = projectile->Next;
-//   }
+        bool hit = false;
+        /* collision with a shield */
+        for(int s = 0; s < _MaximumShields; s++)
+        {
+            if (shields[s].Health <= 0)
+                continue;
+
+            if (shields[s].Position->Row == projectiles[p].Position->Row
+            && shields[s].Position->Column == projectiles[p].Position->Column)
+            {
+                DealShieldDamage(shields[s]);
+                projectiles[p].Collision = true;
+                hit = true;
+                break;
+            }
+        }
+
+        if (hit)
+        {
+            continue;
+        }
+
+        /* collision with a invader */
+        for(int i = 0; i < (_InvaderPerRow * _InvaderRowCount); i++)
+        {
+            if (invaders[i].Health == false)
+                continue;
+            if (invaders[i].Position->Row == projectiles[p].Position->Row
+            && invaders[i].Position->Column == projectiles[p].Position->Column)
+            {
+                player.Score += 50;
+                invaders[i].Health = false;
+                projectiles[p].Collision = true;
+            }
+       
+        }
+    }
 
 }
 
 void DealShieldDamage(Shield shield)
 {
-//   shield->Entity->Health = shield->Entity->Health - 1;
-//   if (shield->Entity->Health == 0)
-//   {
-//     DeleteChar(shield->Entity->Position);
-//     //shield = (struct List *)RemoveAndDestroyElement(shield);
-//   }
+    shield.Health--;
+
+    switch (shield.Health)
+    {
+        case 4:
+            shield.SymbolSwitch = ONE;
+            break;
+        case 3:
+            shield.SymbolSwitch = TWO;
+            break;
+        case 2:
+            shield.SymbolSwitch = THREE;
+            break;
+        case 1:
+            shield.SymbolSwitch = FOUR;
+            break;            
+    }
+
+    if (shield.Health == 0)
+    {
+        DeleteChar(shield.Position);
+    }
 }
 
 void DrawScore(Player player)
 {
-//   GoToTerminalPosition(terminalSize.ws_row - 2, 1);
-//   printf("<score: %d>", score);
+        mvprintw(LINES - 2, 1, "<score: %d>", player.Score);
 }
 
 void DrawHealth(Player player)
 {
-//   GoToTerminalPosition(terminalSize.ws_row - 2, (int) terminalSize.ws_col / 2);
-//   printf("<health: %d>", playerHealth);
+        mvprintw(LINES - 2, (int)COLS / 2,"<health: %d>", player.Health);
 }
