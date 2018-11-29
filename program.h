@@ -23,16 +23,23 @@
 // GameElements
 #define _InvaderPerRow 11
 #define _InvaderRowCount 5
+#define _BombAppearence 'v'
 #define _PlayerAppearence '^'
+#define _ProjectileAppearence '|'
 #define _InvaderAppearence 'X'
 #define _InvaderAppearenceTwo 'V'
 #define _InvaderAppearenceThree 'W'
 #define _InvaderAppearenceFour 'w'
+#define _ShieldAppearence '#'
+#define _ShieldAppearenceTwo '*'
+#define _ShieldAppearenceThree '+'
+#define _ShieldAppearenceFour '.'
 #define _InvaderHorizontalSpace 5
 #define _InvaderVerticalSpace 2
 #define _InvaderFirstRow 1
 #define _InvaderFirstColumn 1
 #define _MaximumBombs 100
+#define _MaximumShields 100
 #define _MaximumProjectiles 20
 
 #define _MoveHorizontalStep 2
@@ -52,12 +59,18 @@ int ShowGameOverScreen();
 int PrintSplashScreen(char ** image, int imageLength, char ** message, int messageLength);
 void Draw();
 void DrawInvaders(Invader *);
+void DrawScore();
 void BuildShields();
 void DrawPlayer();
 
 /* game logic*/
 void GetNextPosition(struct Position *lastPosition, struct Position *newPosition, int listCount);
-void MoveInvaders();
-void ValidateInvaderDirection();
+void MoveInvaders(Invader *invader);
+void MoveProjectiles();
+void Shoot();
+void ValidateInvaderDirection(Invader *invader);
+void IncrementScore(int value);
+void DealShieldDamage(Shield shield);
+void DetectCollision();
 
 #endif
