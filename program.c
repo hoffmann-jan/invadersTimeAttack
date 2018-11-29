@@ -24,8 +24,8 @@ int main(void)
 
     SetUp();                    // prepare tec - spezifics
     ShowSplashScreen();
-    Initialize();               // prepare entity's and initial draw
-
+    
+    /* setup vars */
     Player player;
     Invader invaders[_InvaderPerRow * _InvaderRowCount];
     struct Projectile projectiles[_MaximumProjectiles];
@@ -33,22 +33,19 @@ int main(void)
     struct Shield shields[100]; 
 
     /* init player */
-    Position playerPosition;
-    playerPosition.Column = COLS / 2;
-    playerPosition.Row = LINES - 5;
+    Position * playerPosition = (Position *)malloc(sizeof(Position) + 1);;
+    playerPosition->Column = COLS / 2;
+    playerPosition->Row = LINES - 5;
     player.Health = 3;
     player.Score = 0;
     player.Symbol = _PlayerAppearence;
-    player.Position = &playerPosition;
+    player.Position = playerPosition;
     
-    /**/
-    /**/
-    // Initialize(invaders); <- bitte mal in die Methode schauen
-
+    /* init invaders */
     int i = 0;
     while (i < (_InvaderPerRow * _InvaderRowCount))
     {
-        Position * invaderPosition = (Position *)malloc(sizeof(Position));
+        Position * invaderPosition = (Position *)malloc(sizeof(Position) + 1);
         
         int row = i % _InvaderPerRow;
         int col = i / _InvaderPerRow;
@@ -77,10 +74,22 @@ int main(void)
 
         key = inputThread->key;
 
-        if (key == KEY_ESC) break;
-        else if (key == KEY_A || key == KEY_a) player.Position->Column--;
-        else if (key == KEY_D || key == KEY_d) player.Position->Column++;
-        key = KEY_NONE;
+        if (key == KEY_ESC)
+        {
+            break;
+        }
+        else if (key == KEY_A || key == KEY_a)
+        {
+            // DeleteChar(player.Position);
+            mvaddch(player.Position->Row, player.Position->Column, ' ');
+            player.Position->Column--;
+        }
+        else if (key == KEY_D || key == KEY_d) 
+        {
+            // DeleteChar(player.Position);
+            mvaddch(player.Position->Row, player.Position->Column, ' ');
+            player.Position->Column++;
+        }
 
         /* 1000000 = 1s */
         usleep(1000000 / (_FramesPerSecond));
@@ -157,15 +166,24 @@ void ShowSplashScreen()
 /* ================================================================================================================= */
 void DrawInvaders(Invader *invaders) 
 {
-    /*draw invaders*/
     int i = 0;
     while (i < (_InvaderPerRow * _InvaderRowCount))
     {
-        if (invaders[i].SymbolSwitch)
-            mvaddch(invaders[i].Position->Row, invaders[i].Position->Column, invaders[i].SymbolOne);
-        else
-            mvaddch(invaders[i].Position->Row, invaders[i].Position->Column, invaders[i].SymbolTwo);
-        
+        switch (invaders[i].SymbolSwitch)
+        {
+            case ONE:
+                mvaddch(invaders[i].Position->Row, invaders[i].Position->Column, invaders[i].SymbolOne);
+                break;
+            case TWO:
+                mvaddch(invaders[i].Position->Row, invaders[i].Position->Column, invaders[i].SymbolTwo);
+                break;
+            case THREE:
+                mvaddch(invaders[i].Position->Row, invaders[i].Position->Column, invaders[i].SymbolThree);
+                break;
+            case FOUR:
+                mvaddch(invaders[i].Position->Row, invaders[i].Position->Column, invaders[i].SymbolFour);
+                break;
+        }
         i++;
     }
 }
@@ -175,40 +193,14 @@ void DrawPlayer(Player player)
     mvaddch(player.Position->Row, player.Position->Column, player.Symbol);
 }
 
-void DeleteChar(struct Position *pos)
+void DeleteChar(Position *position)
 {
-    mvaddch(pos->Row, pos->Column, ' ');
+    mvaddch(position->Row, position->Column, ' ');
 }
 
 /* ================================================================================================================= */
 /* ====================================================== LOGIC ==================================================== */
 /* ================================================================================================================= */
-void Initialize(Invader *invaders)
-{
-   //initalize hier erzeugt speicherfehler (warruuum? dachte ich übergebe den Zeiger?)
-    /*int i = 0;
-    while (i < (_InvaderPerRow * _InvaderRowCount))
-    {
-        Position * invaderPosition = (Position *)malloc(sizeof(Position));
-        
-        int row = i % _InvaderPerRow;
-        int col = i / _InvaderPerRow;
-
-        invaderPosition->Column = _InvaderFirstRow + row + ( row * _InvaderHorizontalSpace);
-        invaderPosition->Row = _InvaderFirstColumn + col + (col * _InvaderVerticalSpace);
-        invaders[i].Position = invaderPosition;
-
-        invaders[i].Health = true;
-        invaders[i].Direction = DOWN;
-        invaders[i].SymbolOne = _InvaderAppearence;
-        invaders[i].SymbolTwo = _InvaderAppearenceTwo;
-        invaders[i].SymbolThree = _InvaderAppearenceThree;
-        invaders[i].SymbolFour = _InvaderAppearenceFour;
-        invaders[i].SymbolSwitch = ONE;
-        i++;
-    }
-    */
-}
 
 void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount)
 {
@@ -235,76 +227,89 @@ void GetNextPosition(Position *lastPosition, Position *newPosition, int listCoun
     }
 }
 
-void MoveInvaders(Invader *invaders)
+void MoveInvaders(Invader *invader)
 {    
-    // /* check direction */
-    // ValidateInvaderDirection(invaders);   
+    /* check and set direction */
+    ValidateInvaderDirection(invader);   
 
-    // while (invaderList != NULL)
-    // {
-    //     invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
-    //     /* delete old position */
-    //     DeleteChar(invaderList->Entity->Position);
+    /* switch appearence */
+    int i = 0;
+    while (i < (_InvaderPerRow * _InvaderRowCount))
+    {
+        switch (invader[i].SymbolSwitch)
+        {
+            case ONE:
+                invader[i].SymbolSwitch = TWO;
+                break;
+            case TWO:
+                invader[i].SymbolSwitch = THREE;
+                break;
+            case THREE:
+                invader[i].SymbolSwitch = FOUR;
+                break;
+            case FOUR:
+                invader[i].SymbolSwitch = ONE;
+                break;
+        }
 
-    //     /* move */
-    //     if (invaderMoveForwart)
-    //     {
-    //         invaderList->Entity->Position->Row++;
-    //         invaderList->Entity->SymbolSwitch = false;
-    //     }
-    //     else
-    //     {
-    //         if (!invaderDirection) /* true, left; flase, right */
-    //         {
-    //             invaderList->Entity->Position->Column = invaderList->Entity->Position->Column + _MoveHorizontalStep;
-    //         }
-    //         else
-    //         {   
-    //             invaderList->Entity->Position->Column = invaderList->Entity->Position->Column - _MoveHorizontalStep;
-    //         }
-    //     }
+        /* delete old position */
+        DeleteChar(invader[i].Position);
 
-    //     /* switch Symbols */
-    //     invaderList->Entity->SymbolSwitch = !invaderList->Entity->SymbolSwitch;
+        /* move */
+        if (invaderMoveForwart)
+        {
+            invader[i].Position->Row++;
+        }
+        else
+        {
+            if (!invaderDirection) /* true, left; flase, right */
+            {
+                invader[i].Position->Column = invader[i].Position->Column + _MoveHorizontalStep;
+            }
+            else
+            {   
+                invader[i].Position->Column = invader[i].Position->Column - _MoveHorizontalStep;
+            }
+        }
+        i++;
+    }
 
-    //     /* next */
-    //     invaderList = invaderList->Next;
-    // }
-    // invaderMoveForwart = false;
+    invaderMoveForwart = false;
 }
 
-void ValidateInvaderDirection(Invader *invaders)
+void ValidateInvaderDirection(Invader *invader)
 {
-    // struct List *list = (struct List *)GetFirstElement(invaders);
+    int min = invader[0].Position->Column - _MoveHorizontalStep;
+    int max = invader[0].Position->Column + _MoveHorizontalStep;
 
-    // if (list == NULL)
-    //     return;
+    int i = 0;
+    while (i < (_InvaderPerRow * _InvaderRowCount))
+    {
+        if (invader[i].Position->Column - _MoveHorizontalStep < min)
+            min = invader[i].Position->Column - _MoveHorizontalStep;
 
-    // int min = list->Entity->Position->Column - _MoveHorizontalStep;
-    // int max = list->Entity->Position->Column + _MoveHorizontalStep;
+        if (invader[i].Position->Column + _MoveHorizontalStep > max)
+            max = invader[i].Position->Column + _MoveHorizontalStep;
 
-    // int i = 1;
-    // while (list != NULL)
-    // {
-    //     if (list->Entity->Position->Column - _MoveHorizontalStep < min)
-    //         min = list->Entity->Position->Column - _MoveHorizontalStep;
+        if (i++ > _InvaderPerRow)
+            break;
+        i++;
+    }
 
-    //     if (list->Entity->Position->Column + _MoveHorizontalStep > max)
-    //         max = list->Entity->Position->Column + _MoveHorizontalStep;
+    if (min <= 1 && invaderDirection == true)
+    {
+        invaderDirection = !invaderDirection;
+        bounceCounter++;
+    }
+    if (max >= COLS && invaderDirection == false)
+    {
+        invaderDirection = !invaderDirection;
+        bounceCounter++;
+    }
 
-    //     list = list->Next;    
-    //     if (i++ > _InvaderPerRow)
-    //         break;
-    // }
-
-    // if (min <= 1 && invaderDirection == true)
-    // {
-    //     invaderDirection = !invaderDirection;
-    //     bounceCounter++;
-    // }
-    // if (max >= COLS && invaderDirection == false)
-    // {
-    //     invaderDirection = !invaderDirection;
-    //     bounceCounter++;
-    // }
+    if (bounceCounter >= 3)
+    {
+        invaderMoveForwart = true;
+        bounceCounter = 1;
+    }
 }
