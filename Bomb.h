@@ -4,12 +4,12 @@
 #ifndef BOMB_H
 #define BOMB_H
 
-struct Bomb
+typedef struct Bomb
 {
   struct Position *Position;
   char Symbol;
   Direction Direction;
   bool Collision;
-};
+} Bomb;
 
 #endif
