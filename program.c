@@ -119,11 +119,13 @@ int main(void)
         i++;
     }
 
-/* ================================================================================================================= */
-/* ====================================================== DRAW ===================================================== */
-/* ================================================================================================================= */
-while(true)
-    {
+    bool breakLoop = false;
+    /* ================================================================================================================= */
+    /* ====================================================== DRAW ===================================================== */
+    /* ================================================================================================================= */
+    while(true)
+    {        
+
         DetectCollision(player, invaders, projectiles, bombs, shields);
         DrawInvaders(invaders); 
         DrawPlayer(player);
@@ -134,28 +136,33 @@ while(true)
         DrawBombs(bombs);
         refresh();
 
+        
+
         key = inputThread->key;
 
-        if (key == KEY_ESC)
+        switch(key)
         {
-            break;
-        }
-        else if (key == KEY_A || key == KEY_a || key == KEY_LEFT)
-        {
-            // DeleteChar(player.Position);
-            mvaddch(player.Position->Row, player.Position->Column, ' ');
-            player.Position->Column--;
-        }
-        else if (key == KEY_D || key == KEY_d || key == KEY_RIGHT) 
-        {
-            // DeleteChar(player.Position);
-            mvaddch(player.Position->Row, player.Position->Column, ' ');
-            player.Position->Column++;
-        }
-        else if (key == KEY_Space)
-        {
-            Shoot(projectiles, player);
-        }
+            case KEY_ESC:
+                breakLoop = true;
+                break;
+            case KEY_A:
+            case KEY_a:
+                mvaddch(player.Position->Row, player.Position->Column, ' ');
+                player.Position->Column--;
+                releaseThreadKey(inputThread);
+                break;
+            case KEY_D:
+            case KEY_d:
+                mvaddch(player.Position->Row, player.Position->Column, ' ');
+                player.Position->Column++;
+                releaseThreadKey(inputThread);
+                break;
+            case KEY_Space:
+                Shoot(projectiles, player);
+                releaseThreadKey(inputThread);
+                break;
+        } 
+        
 
         /* 1000000 = 1s */
         usleep(1000000 / _FramesPerSecond);
@@ -182,6 +189,7 @@ while(true)
         mvprintw(LINES - 1,COLS - 12, "            ");
         mvprintw(LINES - 1,COLS - 12, "Key: %d", key);
         
+        if(breakLoop) break;
     }
 
     Dispose(player, invaders, projectiles, bombs, shields);
