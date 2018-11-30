@@ -308,6 +308,11 @@ void DrawProjectiles(Projectile projectiles[])
     {
         if (projectiles[i].Collision == false)
             mvaddch(projectiles[i].Position->Row, projectiles[i].Position->Column, projectiles[i].Symbol);
+        else
+        {
+            mvaddch(projectiles[i].Position->Row, projectiles[i].Position->Column, ' ');
+            //DeleteChar(&projectiles[i].Position);
+        }
         i++;
     }
 }
@@ -492,6 +497,12 @@ void Shoot(Projectile projectiles[], Player player)
     {
         if (projectiles[i].Collision == true)
         {
+            if (projectiles[i].Position->Column == player.Position->Column
+            && projectiles[i].Position->Row == player.Position->Row - 1)
+            {
+                break;
+            }
+
             projectiles[i].Symbol = _ProjectileAppearence;
             projectiles[i].Position->Column = player.Position->Column;
             projectiles[i].Position->Row = player.Position->Row - 1;
