@@ -2,6 +2,7 @@
 
 bool gameOver = false;
 int bounceCounter = 1;
+int gunCooldown = 0;
 Direction lastDirection = LEFT;
 unsigned long long frameCounter = 0;
 
@@ -166,7 +167,11 @@ int main(void)
                 releaseThreadKey(inputThread);
                 break;
             case KEY_Space:
-                Shoot(projectiles, player);
+                if (gunCooldown == 0)
+                {
+                    Shoot(projectiles, player);
+                    gunCooldown = _FramesPerSecond; // 1 sec = _FramesPerSecond
+                }
                 releaseThreadKey(inputThread);
                 break;
         } 
@@ -175,6 +180,9 @@ int main(void)
         /* 1000000 = 1s */
         usleep(1000000 / _FramesPerSecond);
         frameCounter++;
+        if (gunCooldown > 0)
+            gunCooldown--;
+
         
         if((frameCounter % (_FramesPerSecond / 2) == 0)) //nach _FramesPerSecond Frames
         {
