@@ -4,17 +4,14 @@ all: program
 # all: old
 # all: example
 
-debug: clean program.c obj/InputThread.o obj/List.o
-	$(cc) -g -o bin/program.bin obj/InputThread.o obj/List.o program.c -lncurses -lpthread
+debug: clean program.c obj/InputThread.o 
+	$(cc) -g -o bin/program.bin obj/InputThread.o  program.c -lncurses -lpthread
 
-program: clean program.c obj/InputThread.o obj/List.o
-	$(cc) -o bin/program.bin obj/InputThread.o obj/List.o program.c -lncurses -lpthread -O3
+program: clean program.c obj/InputThread.o
+	$(cc) -o bin/program.bin obj/InputThread.o program.c -lncurses -lpthread -O3
 
-old: clean  obj/List.o obj/InputThread.o	
-	$(cc) -o bin/prog.bin obj/List.o obj/InputThread.o -lpthread
-
-obj/List.o: List.c
-	$(cc) -c List.c -o obj/List.o
+old: clean obj/InputThread.o	
+	$(cc) -o bin/prog.bin obj/InputThread.o -lpthread
 
 obj/Position.o: Position.c
 	$(cc) -c Position.c -o obj/Position.o
