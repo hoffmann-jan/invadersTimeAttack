@@ -143,8 +143,6 @@ int main(void)
         refresh();
         Test(&player);
 
-        
-
         key = inputThread->key;
 
         switch(key)
@@ -154,10 +152,12 @@ int main(void)
                 break;
             case KEY_A:
             case KEY_a:
+            case KEY_LEFT:
                 mvaddch(player.Position->Row, player.Position->Column, ' ');
                 player.Position->Column--;
                 releaseThreadKey(inputThread);
                 break;
+            case KEY_RIGHT:
             case KEY_D:
             case KEY_d:
                 mvaddch(player.Position->Row, player.Position->Column, ' ');
