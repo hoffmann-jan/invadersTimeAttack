@@ -144,7 +144,7 @@ int main(void)
         refresh();
 
         key = inputThread->key;
-        //gameOver = IsGameOver(player, invaders);
+        gameOver = IsGameOver(player, invaders);
 
         switch(key)
         {
@@ -691,7 +691,7 @@ bool IsGameOver(Player player, Invader invader[])
     if (player.Health <= 0)
         return true;
 
-    if (player.Position->Row == invader[_InvaderPerRow * _InvaderRowCount].Position->Row)
+    if (player.Position->Row == invader[(_InvaderPerRow * _InvaderRowCount) -1].Position->Row)
         return true;
 
     return false;
