@@ -132,7 +132,7 @@ int main(void)
     while(true)
     {        
 
-        DetectCollision(player, invaders, projectiles, bombs, shields);
+        DetectCollision(&player, invaders, projectiles, bombs, shields);
         DrawInvaders(invaders); 
         DrawPlayer(player);
         DrawProjectiles(projectiles);
