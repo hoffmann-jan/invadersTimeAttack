@@ -24,6 +24,7 @@
 #define _InvaderPerRow 11
 #define _InvaderRowCount 5
 #define _BombAppearence 'v'
+#define _DisabledAppearence ' '
 #define _PlayerAppearence '^'
 #define _ProjectileAppearence '|'
 #define _InvaderAppearence 'X'
@@ -63,6 +64,7 @@ void DrawScore();
 void BuildShields(Shield shield[]);
 void DrawShields(Shield shield[]);
 void DrawPlayer(Player player);
+void DrawBombs(Bomb bombs[]);
 
 /* game logic*/
 void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount);

@@ -60,7 +60,7 @@ int main(void)
         Position * projectilePosition = (Position *)malloc(sizeof(Position));
 
         projectiles[i].Position = projectilePosition;
-        projectiles[i].Symbol = _ProjectileAppearence;
+        projectiles[i].Symbol = _DisabledAppearence;
         projectiles[i].Direction = UP;
         projectiles[i].Collision = true;
         i++;
@@ -73,7 +73,7 @@ int main(void)
         Position * bombPosition = (Position *)malloc(sizeof(Position));
 
         bombs[i].Position = bombPosition;
-        bombs[i].Symbol = _BombAppearence;
+        bombs[i].Symbol = _DisabledAppearence;
         bombs[i].Direction = DOWN;
         bombs[i].Collision = true;
         i++;
@@ -81,17 +81,41 @@ int main(void)
 
     /* init shields */
     i = 0;
+    int cursor = 1;
+    int ninth = (int) COLS / 9;
+    /* set row for the shields */
+    int shieldRow = ((int) LINES / 20) * 15;
     while (i < _MaximumShields)
     {
         Position * shieldPosition = (Position *)malloc(sizeof(Position));
+        shieldPosition->Column = -1;
+        shieldPosition->Row = -1;
+        shields[i].Health = 5;
 
+        while (cursor < LINES)
+        {
+            if ( (ninth < cursor && cursor <= ninth * 2)
+            || (ninth * 3 < cursor && cursor <= ninth * 4)
+            || (ninth * 5 < cursor && cursor <= ninth * 6)
+            || (ninth * 7 < cursor && cursor <= ninth * 8))
+            {
+                shieldPosition->Column = cursor;
+                shieldPosition->Row = shieldRow;
+                break;
+            }
+            if (cursor > _MaximumShields)
+            {
+                shields[i].Health = 0;
+                break;
+            }
+            cursor++;
+        }
         shields[i].Position = shieldPosition;
         shields[i].SymbolOne = _ShieldAppearence;
         shields[i].SymbolTwo = _ShieldAppearenceTwo;
         shields[i].SymbolThree = _ShieldAppearenceThree;
         shields[i].SymbolFour = _ShieldAppearenceFour;
         shields[i].SymbolSwitch = ONE;
-        shields[i].Health = 5;
         i++;
     }
 
@@ -107,6 +131,7 @@ while(true)
         DrawScore(player);
         DrawHealth(player);
         DrawShields(shields);
+        DrawBombs(bombs);
         refresh();
 
         key = inputThread->key;
@@ -444,6 +469,7 @@ void Shoot(Projectile projectiles[], Player player)
     {
         if (projectiles[i].Collision == true)
         {
+            projectiles[i].Symbol = _ProjectileAppearence;
             projectiles[i].Position->Column = player.Position->Column;
             projectiles[i].Position->Row = player.Position->Row - 1;
             projectiles[i].Collision = false;
@@ -493,6 +519,7 @@ void DetectCollision(Player player, Invader invaders[], Projectile projectiles[]
             {
                 DealShieldDamage(shields[s]);
                 projectiles[p].Collision = true;
+                projectiles[p].Symbol = _DisabledAppearence;
                 hit = true;
                 break;
             }
@@ -555,4 +582,9 @@ void DrawScore(Player player)
 void DrawHealth(Player player)
 {
         mvprintw(LINES - 2, (int)COLS / 2,"<health: %d>", player.Health);
+}
+
+void DrawBombs(Bomb bombs[])
+{
+
 }
