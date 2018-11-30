@@ -55,7 +55,8 @@
 void Initialize();
 void Dispose(Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
 void SetUp();   
-void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);       
+void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
+int RunGame();
 
 /* draw support */
 void ShowSplashScreen();

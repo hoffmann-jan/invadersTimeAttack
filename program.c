@@ -833,6 +833,8 @@ int PrintSplashScreen(char ** image, int imageLength, char ** message, int messa
     printf("\033[H\033[J");
     /* move cursor to top left */
     printf("\033[%d;%dH", 1, 1);
+    /* show cursor */
+    printf("\e[?25h");
 
     if (result == 'q')
         return 1;
