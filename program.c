@@ -130,19 +130,19 @@ int main(void)
 
     bool breakLoop = false;
     /* ================================================================================================================= */
-    /* ====================================================== DRAW ===================================================== */
+    /* =================================================== GAME LOOP =================================================== */
     /* ================================================================================================================= */
     while(true)
     {
 
         DetectCollision(&player, invaders, projectiles, bombs, shields);
-        DrawInvaders(invaders); 
         DrawPlayer(player);
         DrawShields(shields);
         DrawProjectiles(projectiles);
+        DrawBombs(bombs);
+        DrawInvaders(invaders); 
         DrawScore(player);
         DrawHealth(player);
-        DrawBombs(bombs);
         refresh();
 
         key = inputThread->key;
@@ -657,6 +657,27 @@ void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[
             continue;
         }
 
+    }
+
+
+    /* collision invader with shield */
+    for(int i = 0; i < (_InvaderPerRow * _InvaderRowCount); i++)
+    {
+        if (invaders[i].Health == false)
+            continue;
+
+        for(int s = 0; s < _MaximumShields; s++)
+        {
+            if (shields[s].Health <= 0)
+                continue;
+
+            if (shields[s].Position->Row == invaders[i].Position->Row
+            && shields[s].Position->Column == invaders[i].Position->Column)
+            {
+                shields[s].Health = 0;
+                break;
+            }
+        }
     }
 
 }
