@@ -505,19 +505,14 @@ void Shoot(Projectile projectiles[], Player player)
 
 void MoveProjectiles(Projectile projectiles[])
 {
-    int i = 0;
-    while (i < _MaximumProjectiles)
+    for(int i = 0; i < _MaximumProjectiles && projectiles[i].Collision == false; i++)
     {
-        if (projectiles[i].Collision == false)
-        {
-            DeleteChar(projectiles[i].Position);
-            projectiles[i].Position->Row--;     
+        DeleteChar(projectiles[i].Position);
+        projectiles[i].Position->Row--;     
 
-            if (projectiles[i].Position->Row < 1)
-                projectiles[i].Collision = true;
-        }
-
-        i++;
+        if (projectiles[i].Position->Row < 1)
+            projectiles[i].Collision = true;
+    
     }
 }
 
