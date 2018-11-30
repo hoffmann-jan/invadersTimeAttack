@@ -8,13 +8,17 @@ unsigned long long frameCounter = 0;
 
 int main(void)
 {    
-    int _PRESSED_BUTTON = 0;
+    /* start InputThread, special thanks to j.smolka for support <3 */
+    InputThread *inputThread = threadAlloc();
+    threadStart(inputThread);
+    
     while (true)
     {
-        _PRESSED_BUTTON = 0;
-        if(1 == RunGame())
+        if(1 == RunGame(inputThread))
         break;
     }
+
+    // TODO free inputthread, end nurses
     return EXIT_SUCCESS;
 }
 
@@ -522,7 +526,7 @@ bool IsGameOver(Player player, Invader invader[])
     return false;
 }
 
-int ShowGameOverScreen(Player player)
+int ShowGameOverScreen(InputThread *inputThread, Player player)
 {
     int imageLength = 5;
     char ** image = (char **)malloc(sizeof(char *) * imageLength);
@@ -553,10 +557,10 @@ int ShowGameOverScreen(Player player)
     strcpy(message[2], "press any key to start .. or 'q' to quit");
     free(player.Position);
 
-    return PrintSplashScreen(image, imageLength, message, messageLength);
+    return PrintSplashScreen(inputThread ,image, imageLength, message, messageLength);
 }
 
-void ShowSplashScreen()
+void ShowSplashScreen(InputThread *inputThread)
 {
     int imageLength = 5;
     char ** image = (char **)malloc(sizeof(char *) * imageLength);
@@ -577,7 +581,7 @@ void ShowSplashScreen()
     message[0] = malloc(sizeof(char) * 26 + 1 );
     strcpy(message[0], "press any key to start .. ");
 
-    PrintSplashScreen(image, imageLength, message, messageLength);
+    PrintSplashScreen(inputThread, image, imageLength, message, messageLength);
 }
 
 void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
@@ -662,14 +666,11 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
     }
 }
 
-int RunGame()
+int RunGame(InputThread *inputThread)
 {
-    ShowSplashScreen();
-
-    /* start InputThread, special thanks to j.smolka for support <3 */
-    InputThread *inputThread = threadAlloc();
-    threadStart(inputThread);
     int key = 0;
+    ShowSplashScreen(inputThread);
+
 
     SetUp();                    // prepare tec - spezifics
 
@@ -793,15 +794,15 @@ int RunGame()
 
     Dispose(invaders, projectiles, bombs, shields);
 
-    return ShowGameOverScreen(player);
+    return ShowGameOverScreen(inputThread, player);
 }
 
-int PrintSplashScreen(char ** image, int imageLength, char ** message, int messageLength)
+int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, char ** message, int messageLength)
 {
     /* ANSI color reset */
     printf("\x1b[0m");
     /* clear terminal */
-    printf("\033[H\033[J");
+    ClearTerminal();
     int fifth = (int) LINES / 5;
     int startRow = fifth * 2;
     int startColumn = ((int) COLS / 2) - 25;
@@ -828,15 +829,24 @@ int PrintSplashScreen(char ** image, int imageLength, char ** message, int messa
     }
     free(message);
 
-    char result = getch();
+    int result = 0;
+    
+    while (true)
+    {
+        result = inputThread->key;
+        if (result != 0)
+            break;
+
+        usleep(500); //reduziere prozessorlast
+    }
     /* clear screen */
-    printf("\033[H\033[J");
+    ClearTerminal();
     /* move cursor to top left */
     printf("\033[%d;%dH", 1, 1);
     /* show cursor */
     printf("\e[?25h");
 
-    if (result == 'q')
+    if (result == KEY_Q || result == KEY_q || result == KEY_ESC)
         return 1;
     else
         return 0;
