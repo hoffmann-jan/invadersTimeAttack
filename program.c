@@ -184,7 +184,7 @@ int main(void)
 
         if((frameCounter % ((int)(_FramesPerSecond / 8)) == 0)) // 8x speed
         {
-            MoveProjectiles(projectiles); 
+            MoveProjectiles(projectiles);           
         }
 
         //untere rechte ecke Frameinfo
@@ -515,7 +515,6 @@ void MoveProjectiles(Projectile projectiles[])
 
             if (projectiles[i].Position->Row < 1)
                 projectiles[i].Collision = true;
-            break;
         }
 
         i++;
