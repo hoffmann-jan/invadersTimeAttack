@@ -2,6 +2,8 @@
 #define INVADER_NCURSES_H
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <ncurses.h>
@@ -51,12 +53,13 @@
 // ==================== FUNCTIONS =======================
 /* Runtime */
 void Initialize();
-void Dispose(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
-void SetUp();           
+void Dispose(Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
+void SetUp();   
+void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);       
 
 /* draw support */
 void ShowSplashScreen();
-int ShowGameOverScreen();
+int ShowGameOverScreen(Player player);
 int PrintSplashScreen(char ** image, int imageLength, char ** message, int messageLength);
 void Draw();
 void DrawInvaders(Invader []);

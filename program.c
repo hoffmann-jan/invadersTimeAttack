@@ -8,210 +8,13 @@ unsigned long long frameCounter = 0;
 
 int main(void)
 {    
-    /* start InputThread, special thanks to j.smolka for support <3 */
-    InputThread *inputThread = threadAlloc();
-    threadStart(inputThread);
-    int key = 0;
-
-    SetUp();                    // prepare tec - spezifics
-    ShowSplashScreen();
-    
-    /* setup vars */
-    Player player;
-    Invader invaders[_InvaderPerRow * _InvaderRowCount];
-    Projectile projectiles[_MaximumProjectiles];
-    Bomb bombs[_MaximumBombs];
-    Shield shields[_MaximumShields]; 
-
-    /* init player */
-    Position * playerPosition = (Position *)malloc(sizeof(Position));;
-    playerPosition->Column = COLS / 2;
-    playerPosition->Row = LINES - 5;
-    player.Health = 3;
-    player.Score = 0;
-    player.Symbol = _PlayerAppearence;
-    player.Position = playerPosition;
-    
-    /* init invaders */
-    int i = 0;
-    while (i < (_InvaderPerRow * _InvaderRowCount))
+    int _PRESSED_BUTTON = 0;
+    while (true)
     {
-        Position * invaderPosition = (Position *)malloc(sizeof(Position));
-        
-        int row = i % _InvaderPerRow;
-        int col = i / _InvaderPerRow;
-
-        invaderPosition->Column = _InvaderFirstRow + row + ( row * _InvaderHorizontalSpace);
-        invaderPosition->Row = _InvaderFirstColumn + col + (col * _InvaderVerticalSpace);
-        invaders[i].Position = invaderPosition;
-
-        invaders[i].Health = true;
-        invaders[i].Direction = LEFT;
-        invaders[i].SymbolOne = _InvaderAppearence;
-        invaders[i].SymbolTwo = _InvaderAppearenceTwo;
-        invaders[i].SymbolThree = _InvaderAppearenceThree;
-        invaders[i].SymbolFour = _InvaderAppearenceFour;
-        invaders[i].SymbolSwitch = ONE;
-        i++;
+        _PRESSED_BUTTON = 0;
+        if(1 == RunGame())
+        break;
     }
-
-    /* init projectile array */
-    i = 0;
-    while (i < _MaximumProjectiles)
-    {
-        Position * projectilePosition = (Position *)malloc(sizeof(Position));
-
-        projectiles[i].Position = projectilePosition;
-        projectiles[i].Symbol = _DisabledAppearence;
-        projectiles[i].Direction = UP;
-        projectiles[i].Collision = true;
-        i++;
-    }
-
-    /* init bomb array */
-    i = 0;
-    while (i < _MaximumBombs)
-    {
-        Position * bombPosition = (Position *)malloc(sizeof(Position));
-
-        bombs[i].Position = bombPosition;
-        bombs[i].Symbol = _DisabledAppearence;
-        bombs[i].Direction = DOWN;
-        bombs[i].Collision = true;
-        i++;
-    }
-
-    /* init shields */
-    i = 0;
-    int cursor = 1;
-    int ninth = (int) COLS / 9;
-    /* set row for the shields */
-    int shieldRow = (int) (LINES / 10) * 8;
-    while (i < _MaximumShields)
-    {
-        Position * shieldPosition = (Position *)malloc(sizeof(Position));
-        shieldPosition->Column = -1;
-        shieldPosition->Row = -1;
-        shields[i].Health = 5;
-        if (cursor <= COLS)
-        {
-            while (cursor <= COLS)
-            {
-                if ( (ninth < cursor && cursor <= ninth * 2)
-                || (ninth * 3 < cursor && cursor <= ninth * 4)
-                || (ninth * 5 < cursor && cursor <= ninth * 6)
-                || (ninth * 7 < cursor && cursor <= ninth * 8))
-                {
-                    (*shieldPosition).Column = cursor;
-                    (*shieldPosition).Row = shieldRow;
-                    cursor++;
-                    break;
-                }
-                if (cursor > _MaximumShields)
-                {
-                    shields[i].Health = 0;
-                    break;
-                }
-                cursor++;
-            }
-        }
-        else
-        {
-            shields[i].Health = 0;
-        }
-        shields[i].Position = shieldPosition;
-        shields[i].SymbolOne = _ShieldAppearence;
-        shields[i].SymbolTwo = _ShieldAppearenceTwo;
-        shields[i].SymbolThree = _ShieldAppearenceThree;
-        shields[i].SymbolFour = _ShieldAppearenceFour;
-        shields[i].SymbolSwitch = ONE;
-        i++;
-    }
-
-    bool breakLoop = false;
-    /* ================================================================================================================= */
-    /* =================================================== GAME LOOP =================================================== */
-    /* ================================================================================================================= */
-    while(true)
-    {
-
-        DetectCollision(&player, invaders, projectiles, bombs, shields);
-        DrawPlayer(player);
-        DrawShields(shields);
-        DrawProjectiles(projectiles);
-        DrawBombs(bombs);
-        DrawInvaders(invaders); 
-        DrawScore(player);
-        DrawHealth(player);
-        refresh();
-
-        key = inputThread->key;
-        gameOver = IsGameOver(player, invaders);
-
-        switch(key)
-        {
-            case KEY_ESC:
-                breakLoop = true;
-                break;
-            case KEY_A:
-            case KEY_a:
-            case KEY_LEFT:
-                mvaddch(player.Position->Row, player.Position->Column, ' ');
-                player.Position->Column--;
-                releaseThreadKey(inputThread);
-                break;
-            case KEY_RIGHT:
-            case KEY_D:
-            case KEY_d:
-                mvaddch(player.Position->Row, player.Position->Column, ' ');
-                player.Position->Column++;
-                releaseThreadKey(inputThread);
-                break;
-            case KEY_Space:
-                if (gunCooldown == 0)
-                {
-                    Shoot(projectiles, player);
-                    gunCooldown = _FramesPerSecond; // 1 sec = _FramesPerSecond
-                }
-                releaseThreadKey(inputThread);
-                break;
-        } 
-        
-
-        /* 1000000 = 1s */
-        usleep(1000000 / _FramesPerSecond);
-        frameCounter++;
-        if (gunCooldown > 0)
-            gunCooldown--;
-
-        
-        if((frameCounter % (_FramesPerSecond / 2) == 0)) //nach _FramesPerSecond Frames
-        {
-            MoveInvaders(invaders);    
-            frameCounter = 0;
-        }
-
-        if((frameCounter % ((int)(_FramesPerSecond / 8)) == 0)) // 8x speed
-        {
-            MoveProjectiles(projectiles); 
-                      
-        }
-
-        //untere rechte ecke Frameinfo
-        mvprintw(LINES - 4,COLS - 12, "            ");
-        mvprintw(LINES - 4,COLS - 12, "f: %d, %d", shields[0].Position->Row, shields[0].Position->Column);
-        mvprintw(LINES - 3,COLS - 12, "            ");
-        mvprintw(LINES - 3,COLS - 12, "s: %d, %d", shields[1].Position->Row, shields[1].Position->Column);
-        mvprintw(LINES - 2,COLS - 12, "            ");
-        mvprintw(LINES - 2,COLS - 12, "Frame: %u", frameCounter);
-        mvprintw(LINES - 1,COLS - 12, "            ");
-        mvprintw(LINES - 1,COLS - 12, "Key: %d", key);
-        
-        if(breakLoop) break;
-        if(gameOver) break;
-    }
-
-    Dispose(player, invaders, projectiles, bombs, shields);
     return EXIT_SUCCESS;
 }
 
@@ -229,7 +32,7 @@ void SetUp()
     srand(time(NULL));
 }
 
-void Dispose(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
+void Dispose(Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
 {
     /* free game entities */
     for(int s = 0; s < _MaximumShields; s++)
@@ -248,33 +51,10 @@ void Dispose(Player player, Invader invaders[], Projectile projectiles[], Bomb b
     {
         free(bombs[b].Position);
     }
-    free(player.Position);
 
     //ncurse release
     refresh();
     endwin();              /* stop ncurses mode IMPORTANT! ;D*/
-    ClearTerminal();
-}
-
-void ShowSplashScreen()
-{
-    ClearTerminal();
-  
-    int fifth = (int) LINES / 5;
-    int startRow = fifth * 2;
-    int startColumn = ((int) COLS / 2) - 25;
-
-    mvprintw(startRow++, startColumn, "    _____   ___    _____    ____  __________  _____");
-    mvprintw(startRow++, startColumn, "   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/");
-    mvprintw(startRow++, startColumn, "   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ ");
-    mvprintw(startRow++, startColumn, " _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
-    mvprintw(startRow++, startColumn, "/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  ");
-    mvprintw(startRow, startColumn, "DEBUG_INFO::lines: %d, cols: %d", LINES, COLS);
-    mvprintw(fifth * 3, startColumn + 10, "press any key to start .. ");
-    
-    getch();
-
-    /* clear screen */
     ClearTerminal();
 }
 
@@ -722,13 +502,13 @@ void DrawHealth(Player player)
 
 void DrawBombs(Bomb bombs[])
 {
+    for (int b = 0; b < _MaximumBombs; b++)
+    {
+        if (bombs[b].Collision == true)
+            continue;
 
-}
-
-/* DEBUG */
-void Test(Player *ply)
-{
-    
+        mvaddch(bombs[b].Position->Row, bombs[b].Position->Column, bombs[b].Symbol);
+    }
 }
 
 bool IsGameOver(Player player, Invader invader[])
@@ -740,4 +520,322 @@ bool IsGameOver(Player player, Invader invader[])
         return true;
 
     return false;
+}
+
+int ShowGameOverScreen(Player player)
+{
+    int imageLength = 5;
+    char ** image = (char **)malloc(sizeof(char *) * imageLength);
+
+    for (int i = 0; i < imageLength; i++)
+    {
+        image[i] = malloc(sizeof(char) * 55 + 1 );
+    }
+
+    strcpy(image[0], "  ____    _    __  __ _____    _____     _______ ____  ");
+    strcpy(image[1], " / ___|  / \\  |  \\/  | ____|  / _ \\ \\   / / ____|  _ \\ ");
+    strcpy(image[2], "| |  _  / _ \\ | |\\/| |  _|   | | | \\ \\ / /|  _| | |_) |");
+    strcpy(image[3], "| |_| |/ ___ \\| |  | | |___  | |_| |\\ V / | |___|  _ < ");
+    strcpy(image[4], " \\____/_/   \\_\\_|  |_|_____|  \\___/  \\_/  |_____|_| \\_\\");
+
+    int messageLength = 3;
+    char ** message = (char **)malloc(sizeof(char *) * messageLength);
+
+    for (int i = 0; i < messageLength; i++)
+    {
+        message[i] = malloc(sizeof(char) * 90 + 1 );
+    }
+
+    char *scoreString = (char*)malloc(90 * sizeof(char));
+    sprintf(scoreString, "%s %d", "your score: ", player.Score);
+    strcpy(message[0], scoreString);
+    strcpy(message[1], "");
+    strcpy(message[2], "press any key to start .. or 'q' to quit");
+    free(player.Position);
+
+    return PrintSplashScreen(image, imageLength, message, messageLength);
+}
+
+void ShowSplashScreen()
+{
+    int imageLength = 5;
+    char ** image = (char **)malloc(sizeof(char *) * imageLength);
+
+    for (int i = 0; i < imageLength; i++)
+    {
+        image[i] = malloc(sizeof(char) * 51 + 1 );
+    }
+
+    strcpy(image[0], "    _____   ___    _____    ____  __________  _____");
+    strcpy(image[1], "   /  _/ | / / |  / /   |  / __ \\/ ____/ __ \\/ ___/");
+    strcpy(image[2], "   / //  |/ /| | / / /| | / / / / __/ / /_/ /\\__ \\ ");
+    strcpy(image[3], " _/ // /|  / | |/ / ___ |/ /_/ / /___/ _, _/___/ / ");
+    strcpy(image[4], "/___/_/ |_/  |___/_/  |_/_____/_____/_/ |_|/____/  ");
+
+    int messageLength = 1;
+    char ** message = (char **)malloc(sizeof(char *) * messageLength);
+    message[0] = malloc(sizeof(char) * 26 + 1 );
+    strcpy(message[0], "press any key to start .. ");
+
+    PrintSplashScreen(image, imageLength, message, messageLength);
+}
+
+void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
+{
+    while(true)
+    {
+
+        DetectCollision(&player, invaders, projectiles, bombs, shields);
+        DrawPlayer(player);
+        DrawShields(shields);
+        DrawProjectiles(projectiles);
+        DrawBombs(bombs);
+        DrawInvaders(invaders); 
+        DrawScore(player);
+        DrawHealth(player);
+        refresh();
+
+        key = inputThread->key;
+        gameOver = IsGameOver(player, invaders);
+
+        switch(key)
+        {
+            case KEY_ESC:
+                breakLoop = true;
+                break;
+            case KEY_A:
+            case KEY_a:
+            case KEY_LEFT:
+                mvaddch(player.Position->Row, player.Position->Column, ' ');
+                player.Position->Column--;
+                releaseThreadKey(inputThread);
+                break;
+            case KEY_RIGHT:
+            case KEY_D:
+            case KEY_d:
+                mvaddch(player.Position->Row, player.Position->Column, ' ');
+                player.Position->Column++;
+                releaseThreadKey(inputThread);
+                break;
+            case KEY_Space:
+                if (gunCooldown == 0)
+                {
+                    Shoot(projectiles, player);
+                    gunCooldown = _FramesPerSecond; // 1 sec = _FramesPerSecond
+                }
+                releaseThreadKey(inputThread);
+                break;
+        } 
+        
+
+        /* 1000000 = 1s */
+        usleep(1000000 / _FramesPerSecond);
+        frameCounter++;
+        if (gunCooldown > 0)
+            gunCooldown--;
+
+        
+        if((frameCounter % (_FramesPerSecond / 2) == 0)) //nach _FramesPerSecond Frames
+        {
+            MoveInvaders(invaders);    
+            frameCounter = 0;
+        }
+
+        if((frameCounter % ((int)(_FramesPerSecond / 8)) == 0)) // 8x speed
+        {
+            MoveProjectiles(projectiles); 
+                      
+        }
+
+        //untere rechte ecke Frameinfo
+        mvprintw(LINES - 4,COLS - 12, "            ");
+        mvprintw(LINES - 4,COLS - 12, "f: %d, %d", shields[0].Position->Row, shields[0].Position->Column);
+        mvprintw(LINES - 3,COLS - 12, "            ");
+        mvprintw(LINES - 3,COLS - 12, "s: %d, %d", shields[1].Position->Row, shields[1].Position->Column);
+        mvprintw(LINES - 2,COLS - 12, "            ");
+        mvprintw(LINES - 2,COLS - 12, "Frame: %u", frameCounter);
+        mvprintw(LINES - 1,COLS - 12, "            ");
+        mvprintw(LINES - 1,COLS - 12, "Key: %d", key);
+        
+        if(breakLoop) break;
+        if(gameOver) break;
+    }
+}
+
+int RunGame()
+{
+    ShowSplashScreen();
+
+    /* start InputThread, special thanks to j.smolka for support <3 */
+    InputThread *inputThread = threadAlloc();
+    threadStart(inputThread);
+    int key = 0;
+
+    SetUp();                    // prepare tec - spezifics
+
+    /* setup vars */
+    Player player;
+    Invader invaders[_InvaderPerRow * _InvaderRowCount];
+    Projectile projectiles[_MaximumProjectiles];
+    Bomb bombs[_MaximumBombs];
+    Shield shields[_MaximumShields]; 
+
+    /* init player */
+    Position * playerPosition = (Position *)malloc(sizeof(Position));;
+    playerPosition->Column = COLS / 2;
+    playerPosition->Row = LINES - 5;
+    player.Health = 3;
+    player.Score = 0;
+    player.Symbol = _PlayerAppearence;
+    player.Position = playerPosition;
+
+    /* init invaders */
+    int i = 0;
+    while (i < (_InvaderPerRow * _InvaderRowCount))
+    {
+        Position * invaderPosition = (Position *)malloc(sizeof(Position));
+        
+        int row = i % _InvaderPerRow;
+        int col = i / _InvaderPerRow;
+
+        invaderPosition->Column = _InvaderFirstRow + row + ( row * _InvaderHorizontalSpace);
+        invaderPosition->Row = _InvaderFirstColumn + col + (col * _InvaderVerticalSpace);
+        invaders[i].Position = invaderPosition;
+
+        invaders[i].Health = true;
+        invaders[i].Direction = LEFT;
+        invaders[i].SymbolOne = _InvaderAppearence;
+        invaders[i].SymbolTwo = _InvaderAppearenceTwo;
+        invaders[i].SymbolThree = _InvaderAppearenceThree;
+        invaders[i].SymbolFour = _InvaderAppearenceFour;
+        invaders[i].SymbolSwitch = ONE;
+        i++;
+    }
+
+    /* init projectile array */
+    i = 0;
+    while (i < _MaximumProjectiles)
+    {
+        Position * projectilePosition = (Position *)malloc(sizeof(Position));
+
+        projectiles[i].Position = projectilePosition;
+        projectiles[i].Symbol = _DisabledAppearence;
+        projectiles[i].Direction = UP;
+        projectiles[i].Collision = true;
+        i++;
+    }
+
+    /* init bomb array */
+    i = 0;
+    while (i < _MaximumBombs)
+    {
+        Position * bombPosition = (Position *)malloc(sizeof(Position));
+
+        bombs[i].Position = bombPosition;
+        bombs[i].Symbol = _DisabledAppearence;
+        bombs[i].Direction = DOWN;
+        bombs[i].Collision = true;
+        i++;
+    }
+
+    /* init shields */
+    i = 0;
+    int cursor = 1;
+    int ninth = (int) COLS / 9;
+    /* set row for the shields */
+    int shieldRow = (int) (LINES / 10) * 8;
+    while (i < _MaximumShields)
+    {
+        Position * shieldPosition = (Position *)malloc(sizeof(Position));
+        shieldPosition->Column = -1;
+        shieldPosition->Row = -1;
+        shields[i].Health = 5;
+        if (cursor <= COLS)
+        {
+            while (cursor <= COLS)
+            {
+                if ( (ninth < cursor && cursor <= ninth * 2)
+                || (ninth * 3 < cursor && cursor <= ninth * 4)
+                || (ninth * 5 < cursor && cursor <= ninth * 6)
+                || (ninth * 7 < cursor && cursor <= ninth * 8))
+                {
+                    (*shieldPosition).Column = cursor;
+                    (*shieldPosition).Row = shieldRow;
+                    cursor++;
+                    break;
+                }
+                if (cursor > _MaximumShields)
+                {
+                    shields[i].Health = 0;
+                    break;
+                }
+                cursor++;
+            }
+        }
+        else
+        {
+            shields[i].Health = 0;
+        }
+        shields[i].Position = shieldPosition;
+        shields[i].SymbolOne = _ShieldAppearence;
+        shields[i].SymbolTwo = _ShieldAppearenceTwo;
+        shields[i].SymbolThree = _ShieldAppearenceThree;
+        shields[i].SymbolFour = _ShieldAppearenceFour;
+        shields[i].SymbolSwitch = ONE;
+        i++;
+    }
+
+    bool breakLoop = false;
+    /* ================================================================================================================= */
+    /* =================================================== GAME LOOP =================================================== */
+    /* ================================================================================================================= */
+    GameLoop(inputThread, key, breakLoop, player, invaders, projectiles, bombs, shields);
+
+    Dispose(invaders, projectiles, bombs, shields);
+
+    return ShowGameOverScreen(player);
+}
+
+int PrintSplashScreen(char ** image, int imageLength, char ** message, int messageLength)
+{
+    /* ANSI color reset */
+    printf("\x1b[0m");
+    /* clear terminal */
+    printf("\033[H\033[J");
+    int fifth = (int) LINES / 5;
+    int startRow = fifth * 2;
+    int startColumn = ((int) COLS / 2) - 25;
+
+    for (int i = 0; i < imageLength; i++)
+    {
+        printf("\033[%d;%dH", startRow + i, startColumn);
+        printf("%s", image[i]);
+    }
+    for(int i = imageLength - 1; i >= 0; i--)
+    {
+        free(image[i]);
+    }
+    free(image);
+
+    for (int m = 0; m < messageLength; m++)
+    {
+        printf("\033[%d;%dH", fifth * 4 + m, startColumn + 1);
+        printf("%s", message[m]);
+    }
+    for(int i = messageLength - 1; i >= 0; i--)
+    {
+        free(message[i]);
+    }
+    free(message);
+
+    char result = getch();
+    /* clear screen */
+    printf("\033[H\033[J");
+    /* move cursor to top left */
+    printf("\033[%d;%dH", 1, 1);
+
+    if (result == 'q')
+        return 1;
+    else
+        return 0;
 }
