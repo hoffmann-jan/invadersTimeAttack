@@ -84,7 +84,7 @@ int main(void)
     int cursor = 1;
     int ninth = (int) COLS / 9;
     /* set row for the shields */
-    int shieldRow = ((int) LINES / 20) * 15;
+    int shieldRow = (int) (LINES / 10) * 8;
     while (i < _MaximumShields)
     {
         Position * shieldPosition = (Position *)malloc(sizeof(Position));
@@ -100,8 +100,8 @@ int main(void)
                 || (ninth * 5 < cursor && cursor <= ninth * 6)
                 || (ninth * 7 < cursor && cursor <= ninth * 8))
                 {
-                    shieldPosition->Column = cursor;
-                    shieldPosition->Row = shieldRow;
+                    (*shieldPosition).Column = cursor;
+                    (*shieldPosition).Row = shieldRow;
                     break;
                 }
                 if (cursor > _MaximumShields)
@@ -181,9 +181,9 @@ while(true)
 
         //untere rechte ecke Frameinfo
         mvprintw(LINES - 4,COLS - 12, "            ");
-        mvprintw(LINES - 4,COLS - 12, "l: %d, %d", invaders[0].Position->Row, invaders[0].Position->Column);
+        mvprintw(LINES - 4,COLS - 12, "f: %d, %d", shields[0].Position->Row, shields[0].Position->Column);
         mvprintw(LINES - 3,COLS - 12, "            ");
-        mvprintw(LINES - 3,COLS - 12, "r: %d, %d", invaders[(_InvaderPerRow * _InvaderRowCount) - 1].Position->Row, invaders[(_InvaderPerRow * _InvaderRowCount) - 1].Position->Column);
+        mvprintw(LINES - 3,COLS - 12, "s: %d, %d", shields[1].Position->Row, shields[1].Position->Column);
         mvprintw(LINES - 2,COLS - 12, "            ");
         mvprintw(LINES - 2,COLS - 12, "Frame: %u", frameCounter);
         mvprintw(LINES - 1,COLS - 12, "            ");
