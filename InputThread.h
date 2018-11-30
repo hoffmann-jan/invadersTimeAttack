@@ -18,5 +18,6 @@ void threadStart(InputThread *thread);
 void threadStop(InputThread *thread);
 int threadKey(InputThread *thread);
 void threadFree(InputThread *thread);
+void releaseThreadKey(InputThread *thread);
 
 #endif

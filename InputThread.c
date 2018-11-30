@@ -43,7 +43,7 @@ void threadStart(InputThread *thread)
 void threadStop(InputThread *thread)
 {
     thread->stop = true;
-    pthread_join(thread->pthread, NULL);
+    pthread_join(thread->pthread, NULL); //warte bis alle threads fertig
 }
 
 void threadFree(InputThread *thread)
@@ -57,4 +57,11 @@ int threadKey(InputThread *thread)
     int returnKey = thread->key;      //wert merken
     pthread_mutex_unlock(&thread->mutex);  //mutes freigeben
     return returnKey;
+}
+
+void releaseThreadKey(InputThread *thread)
+{
+    // pthread_mutex_lock(&thread->mutex);   //wieso funktoniert das lock hier nicht o.o
+    thread->key = 0;
+    // pthread_mutex_unlock(&thread->mutex);
 }
