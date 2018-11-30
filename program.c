@@ -136,6 +136,7 @@ int main(void)
         DetectCollision(&player, invaders, projectiles, bombs, shields);
         DrawInvaders(invaders); 
         DrawPlayer(player);
+        DrawShields(shields);
         DrawProjectiles(projectiles);
         DrawScore(player);
         DrawHealth(player);
