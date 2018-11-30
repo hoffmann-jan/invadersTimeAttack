@@ -25,7 +25,7 @@
 #define _InvaderRowCount 5
 #define _BombAppearence 'v'
 #define _DisabledAppearence ' '
-#define _PlayerAppearence '^'
+#define _PlayerAppearence 'A'
 #define _ProjectileAppearence '|'
 #define _InvaderAppearence 'X'
 #define _InvaderAppearenceTwo 'V'
