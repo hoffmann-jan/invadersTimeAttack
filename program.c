@@ -133,7 +133,8 @@ int main(void)
     /* ====================================================== DRAW ===================================================== */
     /* ================================================================================================================= */
     while(true)
-    {        
+    {
+
         DetectCollision(&player, invaders, projectiles, bombs, shields);
         DrawInvaders(invaders); 
         DrawPlayer(player);
@@ -167,7 +168,7 @@ int main(void)
                 releaseThreadKey(inputThread);
                 break;
             case KEY_Space:
-                if (gunCooldown == 0)
+                if (gunCooldown >= 0)
                 {
                     Shoot(projectiles, player);
                     gunCooldown = _FramesPerSecond; // 1 sec = _FramesPerSecond
@@ -192,7 +193,8 @@ int main(void)
 
         if((frameCounter % ((int)(_FramesPerSecond / 8)) == 0)) // 8x speed
         {
-            MoveProjectiles(projectiles);           
+            MoveProjectiles(projectiles); 
+                      
         }
 
         //untere rechte ecke Frameinfo
@@ -311,17 +313,18 @@ void DrawInvaders(Invader invaders[])
 
 void DrawProjectiles(Projectile projectiles[])
 {
-    int i = 0;
-    while (i < _MaximumProjectiles)
+    
+    for (int i = 0 ; i < _MaximumProjectiles; i++)
     {
         if (projectiles[i].Collision == false)
+        {
             mvaddch(projectiles[i].Position->Row, projectiles[i].Position->Column, projectiles[i].Symbol);
+        }
         else
         {
             mvaddch(projectiles[i].Position->Row, projectiles[i].Position->Column, ' ');
-            //DeleteChar(&projectiles[i].Position);
+            //DeleteChar(projectiles[i].Position);
         }
-        i++;
     }
 }
 
@@ -525,7 +528,7 @@ void Shoot(Projectile projectiles[], Player player)
 
 void MoveProjectiles(Projectile projectiles[])
 {
-    for(int i = 0; i < _MaximumProjectiles && projectiles[i].Collision == false; i++)
+    for(int i = 0; i < _MaximumProjectiles ; i++)
     {
         DeleteChar(projectiles[i].Position);
         projectiles[i].Position->Row--;     
