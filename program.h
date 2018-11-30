@@ -50,7 +50,7 @@
 // ==================== FUNCTIONS =======================
 /* Runtime */
 void Initialize();
-void Dispose();
+void Dispose(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
 void SetUp();           
 
 /* draw support */

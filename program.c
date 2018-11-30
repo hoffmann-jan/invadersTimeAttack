@@ -95,8 +95,10 @@ int main(void)
         i++;
     }
 
-    /* GAMELOOP */
-    while(true)
+/* ================================================================================================================= */
+/* ====================================================== DRAW ===================================================== */
+/* ================================================================================================================= */
+while(true)
     {
         DetectCollision(player, invaders, projectiles, bombs, shields);
         DrawInvaders(invaders); 
@@ -157,7 +159,7 @@ int main(void)
         
     }
 
-    Dispose();
+    Dispose(player, invaders, projectiles, bombs, shields);
     return EXIT_SUCCESS;
 }
 
@@ -175,8 +177,27 @@ void SetUp()
     srand(time(NULL));
 }
 
-void Dispose()
+void Dispose(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
 {
+    /* free game entities */
+    for(int s = 0; s < _MaximumShields; s++)
+    {
+        free(shields[s].Position);
+    }
+    for(int i = 0; i < (_InvaderPerRow * _InvaderRowCount); i++)
+    {
+        free(invaders[i].Position);
+    }
+    for(int p = 0; p < _MaximumProjectiles; p++)
+    {
+        free(projectiles[p].Position);
+    }
+    for(int b = 0; b < _MaximumBombs; b++)
+    {
+        free(bombs[b].Position);
+    }
+    free(player.Position);
+
     //ncurse release
     refresh();
     endwin();              /* stop ncurses mode IMPORTANT! ;D*/
