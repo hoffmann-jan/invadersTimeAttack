@@ -102,6 +102,7 @@ int main(void)
                 {
                     (*shieldPosition).Column = cursor;
                     (*shieldPosition).Row = shieldRow;
+                    cursor++;
                     break;
                 }
                 if (cursor > _MaximumShields)
