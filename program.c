@@ -91,24 +91,30 @@ int main(void)
         shieldPosition->Column = -1;
         shieldPosition->Row = -1;
         shields[i].Health = 5;
-
-        while (cursor < LINES)
+        if (cursor <= COLS)
         {
-            if ( (ninth < cursor && cursor <= ninth * 2)
-            || (ninth * 3 < cursor && cursor <= ninth * 4)
-            || (ninth * 5 < cursor && cursor <= ninth * 6)
-            || (ninth * 7 < cursor && cursor <= ninth * 8))
+            while (cursor <= COLS)
             {
-                shieldPosition->Column = cursor;
-                shieldPosition->Row = shieldRow;
-                break;
+                if ( (ninth < cursor && cursor <= ninth * 2)
+                || (ninth * 3 < cursor && cursor <= ninth * 4)
+                || (ninth * 5 < cursor && cursor <= ninth * 6)
+                || (ninth * 7 < cursor && cursor <= ninth * 8))
+                {
+                    shieldPosition->Column = cursor;
+                    shieldPosition->Row = shieldRow;
+                    break;
+                }
+                if (cursor > _MaximumShields)
+                {
+                    shields[i].Health = 0;
+                    break;
+                }
+                cursor++;
             }
-            if (cursor > _MaximumShields)
-            {
-                shields[i].Health = 0;
-                break;
-            }
-            cursor++;
+        }
+        else
+        {
+            shields[i].Health = 0;
         }
         shields[i].Position = shieldPosition;
         shields[i].SymbolOne = _ShieldAppearence;
@@ -135,6 +141,7 @@ int main(void)
         DrawShields(shields);
         DrawBombs(bombs);
         refresh();
+        Test(&player);
 
         
 
@@ -168,13 +175,13 @@ int main(void)
         usleep(1000000 / _FramesPerSecond);
         frameCounter++;
         
-        if((frameCounter % _FramesPerSecond == 0)) //nach _FramesPerSecond Frames
+        if((frameCounter % (_FramesPerSecond / 2) == 0)) //nach _FramesPerSecond Frames
         {
             MoveInvaders(invaders);    
             frameCounter = 0;
         }
 
-        if((frameCounter % ((int)(_FramesPerSecond / 2)) == 0)) // double speed
+        if((frameCounter % ((int)(_FramesPerSecond / 8)) == 0)) // 8x speed
         {
             MoveProjectiles(projectiles); 
         }
@@ -267,6 +274,12 @@ void DrawInvaders(Invader invaders[])
     int i = 0;
     while (i < (_InvaderPerRow * _InvaderRowCount))
     {
+        if(!invaders[i].Health)
+        {
+            i++;
+            continue;
+        }
+
         switch (invaders[i].SymbolSwitch)
         {
             case ONE:
@@ -508,7 +521,7 @@ void MoveProjectiles(Projectile projectiles[])
     }
 }
 
-void DetectCollision(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
+void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
 {
     for(int p = 0; p < _MaximumProjectiles; p++)
     {
@@ -525,7 +538,7 @@ void DetectCollision(Player player, Invader invaders[], Projectile projectiles[]
             if (shields[s].Position->Row == projectiles[p].Position->Row
             && shields[s].Position->Column == projectiles[p].Position->Column)
             {
-                DealShieldDamage(shields[s]);
+                DealShieldDamage(&shields[s]);
                 projectiles[p].Collision = true;
                 projectiles[p].Symbol = _DisabledAppearence;
                 hit = true;
@@ -546,9 +559,10 @@ void DetectCollision(Player player, Invader invaders[], Projectile projectiles[]
             if (invaders[i].Position->Row == projectiles[p].Position->Row
             && invaders[i].Position->Column == projectiles[p].Position->Column)
             {
-                player.Score += 50;
+                player->Score += 50;
                 invaders[i].Health = false;
                 projectiles[p].Collision = true;
+                DeleteChar(projectiles[i].Position);
             }
        
         }
@@ -556,43 +570,49 @@ void DetectCollision(Player player, Invader invaders[], Projectile projectiles[]
 
 }
 
-void DealShieldDamage(Shield shield)
+void DealShieldDamage(Shield *shield)
 {
-    shield.Health--;
+    shield->Health--;
 
-    switch (shield.Health)
+    switch (shield->Health)
     {
         case 4:
-            shield.SymbolSwitch = ONE;
+            shield->SymbolSwitch = ONE;
             break;
         case 3:
-            shield.SymbolSwitch = TWO;
+            shield->SymbolSwitch = TWO;
             break;
         case 2:
-            shield.SymbolSwitch = THREE;
+            shield->SymbolSwitch = THREE;
             break;
         case 1:
-            shield.SymbolSwitch = FOUR;
+            shield->SymbolSwitch = FOUR;
             break;            
     }
 
-    if (shield.Health == 0)
+    if (shield->Health == 0)
     {
-        DeleteChar(shield.Position);
+        DeleteChar(shield->Position);
     }
 }
 
 void DrawScore(Player player)
 {
-        mvprintw(LINES - 2, 1, "<score: %d>", player.Score);
+    mvprintw(LINES - 2, 1, "<score: %d>", player.Score);
 }
 
 void DrawHealth(Player player)
 {
-        mvprintw(LINES - 2, (int)COLS / 2,"<health: %d>", player.Health);
+    mvprintw(LINES - 2, (int)COLS / 2,"<health: %d>", player.Health);
 }
 
 void DrawBombs(Bomb bombs[])
 {
 
+}
+
+/* DEBUG */
+void Test(Player *ply)
+{
+    
 }

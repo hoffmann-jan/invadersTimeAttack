@@ -43,7 +43,7 @@
 #define _MaximumShields 100
 #define _MaximumProjectiles 20
 
-#define _MoveHorizontalStep 2
+#define _MoveHorizontalStep 1
 // 
 #define ClearTerminal() clear()
 #define GoToTerminalPosition move
@@ -72,10 +72,11 @@ void MoveInvaders(Invader invader[]);
 void MoveProjectiles(Projectile projectiles[]);
 void Shoot(Projectile projectiles[], Player player);
 void ValidateInvaderDirection(Invader invader[]);
-void DealShieldDamage(Shield shield);
-void DetectCollision(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
+void DealShieldDamage(Shield *shield);
+void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
 void DrawScore(Player player);
 void DrawHealth(Player player);
 void DrawProjectiles(Projectile projectiles[]);
+void Test(Player *ply);
 
 #endif
