@@ -12,6 +12,8 @@ typedef enum
     KEY_S = 83,
     KEY_d = 100,
     KEY_D = 68,
+    KEY_Q = 81,
+    KEY_q = 113,
     KEY_Left = 260,
     KEY_Right = 261,
     KEY_Up = 259,
