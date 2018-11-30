@@ -78,5 +78,6 @@ void DrawScore(Player player);
 void DrawHealth(Player player);
 void DrawProjectiles(Projectile projectiles[]);
 void Test(Player *ply);
+bool IsGameOver(Player player, Invader invader[]);
 
 #endif

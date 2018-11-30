@@ -1,5 +1,6 @@
 #include "program.h"
 
+bool gameOver = false;
 int bounceCounter = 1;
 Direction lastDirection = LEFT;
 unsigned long long frameCounter = 0;
@@ -132,19 +133,18 @@ int main(void)
     /* ================================================================================================================= */
     while(true)
     {        
-
         DetectCollision(&player, invaders, projectiles, bombs, shields);
         DrawInvaders(invaders); 
         DrawPlayer(player);
+        DrawShields(shields);
         DrawProjectiles(projectiles);
         DrawScore(player);
         DrawHealth(player);
-        DrawShields(shields);
         DrawBombs(bombs);
         refresh();
-        Test(&player);
 
         key = inputThread->key;
+        //gameOver = IsGameOver(player, invaders);
 
         switch(key)
         {
@@ -198,6 +198,7 @@ int main(void)
         mvprintw(LINES - 1,COLS - 12, "Key: %d", key);
         
         if(breakLoop) break;
+        if(gameOver) break;
     }
 
     Dispose(player, invaders, projectiles, bombs, shields);
@@ -536,9 +537,34 @@ void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[
                 DealShieldDamage(&shields[s]);
                 projectiles[p].Collision = true;
                 projectiles[p].Symbol = _DisabledAppearence;
+                DeleteChar(projectiles[p].Position);
                 hit = true;
                 break;
             }
+        }
+
+        if (hit)
+        {
+            continue;
+        }
+
+        /* collision with a bomb */
+        for(int b = 0; b < _MaximumBombs; b++)
+        {
+            if (bombs[b].Collision == true)
+                continue;
+            
+            if (bombs[b].Position->Row == projectiles[p].Position->Row
+            && bombs[b].Position->Column == projectiles[p].Position->Column)
+            {
+                bombs[b].Collision = true;
+                bombs[b].Symbol = _DisabledAppearence;
+                DeleteChar(bombs[b].Position);
+                DeleteChar(projectiles[p].Position);
+                hit = true;
+                break;
+            }
+
         }
 
         if (hit)
@@ -557,10 +583,58 @@ void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[
                 player->Score += 50;
                 invaders[i].Health = false;
                 projectiles[p].Collision = true;
-                DeleteChar(projectiles[i].Position);
+                DeleteChar(projectiles[p].Position);
+                DeleteChar(invaders[i].Position);
             }
        
         }
+    }
+
+    for(int b = 0; b < _MaximumBombs; b++)
+    {
+        if (bombs[b].Collision == true)
+            continue;
+
+        bool hit = false;
+
+        /* collision with a shield */
+        for(int s = 0; s < _MaximumShields; s++)
+        {
+            if (shields[s].Health <= 0)
+                continue;
+
+            if (shields[s].Position->Row == bombs[b].Position->Row
+            && shields[s].Position->Column == bombs[b].Position->Column)
+            {
+                DealShieldDamage(&shields[s]);
+                bombs[b].Collision = true;
+                bombs[b].Symbol = _DisabledAppearence;
+                DeleteChar(bombs[b].Position);
+                hit = true;
+                break;
+            }
+        }
+
+        if (hit)
+        {
+            continue;
+        }
+
+        /* collision with player */
+        if (player->Position->Row == bombs[b].Position->Row
+        && player->Position->Column == bombs[b].Position->Column)
+        {
+            player->Health--;
+            if (player->Health <= 0)
+                gameOver = true;
+
+            bombs[b].Collision = true;
+            bombs[b].Symbol = _DisabledAppearence;
+            DeleteChar(bombs[b].Position);
+            DrawPlayer((*player));
+            continue;
+        }
+
     }
 
 }
@@ -610,4 +684,15 @@ void DrawBombs(Bomb bombs[])
 void Test(Player *ply)
 {
     
+}
+
+bool IsGameOver(Player player, Invader invader[])
+{
+    if (player.Health <= 0)
+        return true;
+
+    if (player.Position->Row == invader[_InvaderPerRow * _InvaderRowCount].Position->Row)
+        return true;
+
+    return false;
 }
