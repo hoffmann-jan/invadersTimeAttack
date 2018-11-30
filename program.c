@@ -168,7 +168,7 @@ int main(void)
                 releaseThreadKey(inputThread);
                 break;
             case KEY_Space:
-                if (gunCooldown >= 0)
+                if (gunCooldown == 0)
                 {
                     Shoot(projectiles, player);
                     gunCooldown = _FramesPerSecond; // 1 sec = _FramesPerSecond
@@ -530,12 +530,14 @@ void MoveProjectiles(Projectile projectiles[])
 {
     for(int i = 0; i < _MaximumProjectiles ; i++)
     {
-        DeleteChar(projectiles[i].Position);
-        projectiles[i].Position->Row--;     
+        if(projectiles[i].Collision == false) // solange projektile keine Collision haben, flieg
+        {
+            DeleteChar(projectiles[i].Position);
+            projectiles[i].Position->Row--;     
 
-        if (projectiles[i].Position->Row < 1)
-            projectiles[i].Collision = true;
-    
+            if (projectiles[i].Position->Row < 1)
+                projectiles[i].Collision = true;
+        }
     }
 }
 
