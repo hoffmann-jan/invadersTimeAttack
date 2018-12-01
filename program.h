@@ -54,13 +54,14 @@
 /* Runtime */
 void Initialize();
 void Dispose(Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
-void SetUp();   
+void SetUp();
+void SetDown();
 void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
 int RunGame(InputThread *inputThread);
 
 /* draw support */
 void ShowSplashScreen(InputThread *inputThread);
-int ShowGameOverScreen(InputThread *inputThread, Player player);
+int ShowGameOverScreen(InputThread *inputThread, Player *player);
 int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, char ** message, int messageLength);
 void Draw();
 void DrawInvaders(Invader []);

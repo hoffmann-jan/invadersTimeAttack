@@ -12,13 +12,21 @@ int main(void)
     InputThread *inputThread = threadAlloc();
     threadStart(inputThread);
     
+    SetUp();
+
     while (true)
     {
         if(1 == RunGame(inputThread))
         break;
     }
 
-    // TODO free inputthread, end nurses
+    free(inputThread);
+    /* release ncurses */
+    SetDown();
+
+    /* Clear Terminal*/
+    printf("\033[H\033[J");
+
     return EXIT_SUCCESS;
 }
 
@@ -34,6 +42,13 @@ void SetUp()
     curs_set(0);            /* disable cursor blinki blinki */
     //nodelay(stdscr, 1);   /* */
     srand(time(NULL));
+}
+
+void SetDown()
+{
+    ClearTerminal();
+    refresh();
+    endwin();              /* stop ncurses mode IMPORTANT! ;D*/
 }
 
 void Dispose(Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
@@ -55,11 +70,6 @@ void Dispose(Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield 
     {
         free(bombs[b].Position);
     }
-
-    //ncurse release
-    refresh();
-    endwin();              /* stop ncurses mode IMPORTANT! ;D*/
-    ClearTerminal();
 }
 
 /* ================================================================================================================= */
@@ -526,7 +536,7 @@ bool IsGameOver(Player player, Invader invader[])
     return false;
 }
 
-int ShowGameOverScreen(InputThread *inputThread, Player player)
+int ShowGameOverScreen(InputThread *inputThread, Player *player)
 {
     int imageLength = 5;
     char ** image = (char **)malloc(sizeof(char *) * imageLength);
@@ -551,11 +561,11 @@ int ShowGameOverScreen(InputThread *inputThread, Player player)
     }
 
     char *scoreString = (char*)malloc(90 * sizeof(char));
-    sprintf(scoreString, "%s %d", "your score: ", player.Score);
+    sprintf(scoreString, "%s %d", "your score: ", player->Score);
     strcpy(message[0], scoreString);
     strcpy(message[1], "");
     strcpy(message[2], "press any key to start .. or 'q' to quit");
-    free(player.Position);
+    free(player->Position);
 
     return PrintSplashScreen(inputThread ,image, imageLength, message, messageLength);
 }
@@ -670,9 +680,6 @@ int RunGame(InputThread *inputThread)
 {
     int key = 0;
     ShowSplashScreen(inputThread);
-
-
-    SetUp();                    // prepare tec - spezifics
 
     /* setup vars */
     Player player;
@@ -794,14 +801,11 @@ int RunGame(InputThread *inputThread)
 
     Dispose(invaders, projectiles, bombs, shields);
 
-    return ShowGameOverScreen(inputThread, player);
+    return ShowGameOverScreen(inputThread, &player);
 }
 
 int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, char ** message, int messageLength)
 {
-    /* ANSI color reset */
-    printf("\x1b[0m");
-    /* clear terminal */
     ClearTerminal();
     int fifth = (int) LINES / 5;
     int startRow = fifth * 2;
@@ -809,26 +813,16 @@ int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, 
 
     for (int i = 0; i < imageLength; i++)
     {
-        printf("\033[%d;%dH", startRow + i, startColumn);
-        printf("%s", image[i]);
+        mvaddstr(startRow + i, startColumn, image[i]);
     }
-    for(int i = imageLength - 1; i >= 0; i--)
-    {
-        free(image[i]);
-    }
-    free(image);
 
     for (int m = 0; m < messageLength; m++)
     {
-        printf("\033[%d;%dH", fifth * 4 + m, startColumn + 1);
-        printf("%s", message[m]);
+        mvaddstr(fifth * 4 + m, startColumn + 1, message[m]);
     }
-    for(int i = messageLength - 1; i >= 0; i--)
-    {
-        free(message[i]);
-    }
-    free(message);
 
+    refresh();
+    releaseThreadKey(inputThread);
     int result = 0;
     
     while (true)
@@ -837,14 +831,23 @@ int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, 
         if (result != 0)
             break;
 
-        usleep(500); //reduziere prozessorlast
+        usleep(500);
     }
+    releaseThreadKey(inputThread);
+
+    for(int i = messageLength - 1; i >= 0; i--)
+    {
+        free(message[i]);
+    }
+    free(message);
+    for(int i = imageLength - 1; i >= 0; i--)
+    {
+        free(image[i]);
+    }
+    free(image);
     /* clear screen */
     ClearTerminal();
-    /* move cursor to top left */
-    printf("\033[%d;%dH", 1, 1);
-    /* show cursor */
-    printf("\e[?25h");
+    refresh();
 
     if (result == KEY_Q || result == KEY_q || result == KEY_ESC)
         return 1;
