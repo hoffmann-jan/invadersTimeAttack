@@ -43,7 +43,7 @@
 #define _InvaderFirstRow 1
 #define _InvaderFirstColumn 1
 #define _MaximumBombs 100
-#define _MaximumShields 100
+#define _MaximumShields 300
 #define _MaximumProjectiles 20
 
 #define _MoveHorizontalStep 1

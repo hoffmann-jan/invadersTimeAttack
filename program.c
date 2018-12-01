@@ -757,6 +757,12 @@ int RunGame(InputThread *inputThread)
     int shieldRow = (int) (LINES / 10) * 8;
     while (i < _MaximumShields)
     {
+        if (i == (_MaximumShields / 3) || i == (_MaximumShields / 3) * 2)
+        {
+            shieldRow++;
+            cursor = 1;
+        }
+        
         Position * shieldPosition = (Position *)malloc(sizeof(Position));
         shieldPosition->Column = -1;
         shieldPosition->Row = -1;
