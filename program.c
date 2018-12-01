@@ -5,6 +5,7 @@ int bounceCounter = 1;
 int gunCooldown = 0;
 Direction lastDirection = LEFT;
 unsigned long long frameCounter = 0;
+int globalScore = 0;
 
 int main(void)
 {    
@@ -407,6 +408,7 @@ void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[
             && invaders[i].Position->Column == projectiles[p].Position->Column)
             {
                 player->Score += timeInSeconds;
+                globalScore += timeInSeconds;
                 invaders[i].Health = false;
                 projectiles[p].Collision = true;
                 DeleteChar(projectiles[p].Position);
@@ -514,7 +516,8 @@ void DealShieldDamage(Shield *shield)
 
 void DrawScore(Player player)
 {
-    mvprintw(LINES - 2, 1, "<score: %d>", player.Score);
+    // mvprintw(LINES - 2, 1, "<score: %d>", player.Score);
+    mvprintw(LINES - 2, 1, "<score: %d>", globalScore);
 }
 
 void DrawHealth(Player player)
@@ -572,7 +575,8 @@ int ShowGameOverScreen(InputThread *inputThread, int score)
     }
 
     char *scoreString = (char*)malloc(90 * sizeof(char));
-    sprintf(scoreString, "your score: %d", score);
+    // sprintf(scoreString, "your score: %d", score);
+    sprintf(scoreString, "your score: %d", globalScore);
     strcpy(message[0], scoreString);
     strcpy(message[1], "");
     strcpy(message[2], "press any key to start .. or 'q' to quit");
@@ -698,7 +702,8 @@ int RunGame(InputThread *inputThread)
 {
     int key = 0;
     ShowSplashScreen(inputThread);
-
+    globalScore = 0;
+    
     /* setup vars */
     Player player;
     Invader invaders[_InvaderPerRow * _InvaderRowCount];
