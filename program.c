@@ -378,6 +378,8 @@ void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[
             {
                 bombs[b].Collision = true;
                 bombs[b].Symbol = _DisabledAppearence;
+                projectiles[p].Collision = true;
+                projectiles[p].Symbol = _DisabledAppearence;
                 DeleteChar(bombs[b].Position);
                 DeleteChar(projectiles[p].Position);
                 hit = true;
