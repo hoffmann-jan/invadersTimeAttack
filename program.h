@@ -53,7 +53,7 @@
 // ==================== FUNCTIONS =======================
 /* Runtime */
 void Initialize();
-void Dispose(Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
+void Dispose(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
 void SetUp();
 void SetDown();
 void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
@@ -61,11 +61,10 @@ int RunGame(InputThread *inputThread);
 
 /* draw support */
 void ShowSplashScreen(InputThread *inputThread);
-int ShowGameOverScreen(InputThread *inputThread, Player *player);
+int ShowGameOverScreen(InputThread *inputThread, int score);
 int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, char ** message, int messageLength);
 void Draw();
 void DrawInvaders(Invader []);
-void DrawScore();
 void BuildShields(Shield shield[]);
 void DrawShields(Shield shield[]);
 void DrawPlayer(Player player);
