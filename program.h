@@ -29,7 +29,7 @@
 #define _BombAppearence '*'
 #define _DisabledAppearence ' '
 #define _PlayerAppearence 'A'
-#define _ProjectileAppearence 'T'
+#define _ProjectileAppearence '^'
 #define _InvaderAppearence 'X'
 #define _InvaderAppearenceTwo 'V'
 #define _InvaderAppearenceThree 'W'
