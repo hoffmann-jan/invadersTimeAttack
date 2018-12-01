@@ -205,7 +205,7 @@ void MoveInvaders(Invader invader[])
         switch (invader[i].SymbolSwitch)
         {
             case ONE:
-                invader[i].SymbolSwitch = TWO;
+                invader[i].SymbolSwitch = THREE;
                 break;
             case TWO:
                 invader[i].SymbolSwitch = THREE;
@@ -214,7 +214,7 @@ void MoveInvaders(Invader invader[])
                 invader[i].SymbolSwitch = FOUR;
                 break;
             case FOUR:
-                invader[i].SymbolSwitch = ONE;
+                invader[i].SymbolSwitch = THREE;
                 break;
         }
 
@@ -596,14 +596,15 @@ void ShowSplashScreen(InputThread *inputThread)
 
 void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
 {
+    int dropBomb = 0;
     while(true)
     {
 
         DetectCollision(&player, invaders, projectiles, bombs, shields);
         DrawPlayer(player);
+        DrawBombs(bombs);
         DrawShields(shields);
         DrawProjectiles(projectiles);
-        DrawBombs(bombs);
         DrawInvaders(invaders); 
         DrawScore(player);
         DrawHealth(player);
@@ -653,14 +654,22 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
         
         if((frameCounter % (_FramesPerSecond / 2) == 0)) //nach _FramesPerSecond Frames
         {
-            MoveInvaders(invaders);    
+            MoveInvaders(invaders);
+            dropBomb++;
             frameCounter = 0;
         }
 
         if((frameCounter % ((int)(_FramesPerSecond / 8)) == 0)) // 8x speed
         {
-            MoveProjectiles(projectiles); 
-                      
+            MoveProjectiles(projectiles);         
+            MoveBombs(bombs);             
+        }
+
+        if (dropBomb == 3)
+        {
+            DropBomb(invaders, bombs);
+            dropBomb = 0;
+            
         }
         
         if(breakLoop) break;
@@ -848,4 +857,48 @@ int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, 
         return 1;
     else
         return 0;
+}
+
+void DropBomb(Invader invader[], Bomb bombs[])
+{
+    for (int i = 0; i < _InvaderPerRow * _InvaderRowCount; i++)
+    {
+        if (invader[i].Health == false)
+            continue;
+
+        int random = rand();      // Returns a pseudo-random integer between 0 and RAND_MAX.
+        if (random < RAND_MAX / 4) // 1/4 = 25% drop chance
+        {
+            for (int b = 0; b < _MaximumBombs; b++)
+            {
+                if (bombs[b].Collision == true)
+                {
+                    bombs[b].Symbol = _BombAppearence;
+                    bombs[b].Direction = DOWN;
+                    bombs[b].Position->Column = invader[i].Position->Column;
+                    bombs[b].Position->Row = invader[i].Position->Row + 1;
+                    bombs[b].Collision = false;
+                    
+                    break;
+                }
+
+            }
+        }
+    }
+
+}
+
+void MoveBombs(Bomb bombs[])
+{
+    for(int b = 0; b < _MaximumBombs; b++)
+    {
+        if(bombs[b].Collision == false) // solange projektile keine Collision haben, flieg
+        {
+            DeleteChar(bombs[b].Position);
+            bombs[b].Position->Row++;     
+
+            if (bombs[b].Position->Row > LINES - 5)
+                bombs[b].Collision = true;
+        }
+    }
 }

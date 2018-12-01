@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <ncurses.h>
+#include <time.h>
 
 #include "InputThread.h"
 #include "Position.h"
@@ -25,7 +26,7 @@
 // GameElements
 #define _InvaderPerRow 11
 #define _InvaderRowCount 5
-#define _BombAppearence 'v'
+#define _BombAppearence '*'
 #define _DisabledAppearence ' '
 #define _PlayerAppearence 'A'
 #define _ProjectileAppearence 'T'
@@ -73,6 +74,7 @@ void DrawBombs(Bomb bombs[]);
 /* game logic*/
 void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount);
 void MoveInvaders(Invader invader[]);
+void MoveBombs(Bomb bombs[]);
 void MoveProjectiles(Projectile projectiles[]);
 void Shoot(Projectile projectiles[], Player player);
 void ValidateInvaderDirection(Invader invader[]);
@@ -83,5 +85,6 @@ void DrawHealth(Player player);
 void DrawProjectiles(Projectile projectiles[]);
 void Test(Player *ply);
 bool IsGameOver(Player player, Invader invader[]);
+void DropBomb(Invader invader[], Bomb bombs[]);
 
 #endif
