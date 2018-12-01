@@ -51,7 +51,7 @@ void SetDown()
     endwin();              /* stop ncurses mode IMPORTANT! ;D*/
 }
 
-void Dispose(Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
+void Dispose(Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
 {
     /* free game entities */
     for(int s = 0; s < _MaximumShields; s++)
@@ -70,6 +70,7 @@ void Dispose(Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield 
     {
         free(bombs[b].Position);
     }
+    free(player.Position);
 }
 
 /* ================================================================================================================= */
@@ -536,7 +537,7 @@ bool IsGameOver(Player player, Invader invader[])
     return false;
 }
 
-int ShowGameOverScreen(InputThread *inputThread, Player *player)
+int ShowGameOverScreen(InputThread *inputThread, int score)
 {
     int imageLength = 5;
     char ** image = (char **)malloc(sizeof(char *) * imageLength);
@@ -561,11 +562,10 @@ int ShowGameOverScreen(InputThread *inputThread, Player *player)
     }
 
     char *scoreString = (char*)malloc(90 * sizeof(char));
-    sprintf(scoreString, "%s %d", "your score: ", player->Score);
+    sprintf(scoreString, "your score: %d", score);
     strcpy(message[0], scoreString);
     strcpy(message[1], "");
     strcpy(message[2], "press any key to start .. or 'q' to quit");
-    free(player->Position);
 
     return PrintSplashScreen(inputThread ,image, imageLength, message, messageLength);
 }
@@ -615,6 +615,8 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
         switch(key)
         {
             case KEY_ESC:
+            case KEY_Q:
+            case KEY_q:
                 breakLoop = true;
                 break;
             case KEY_A:
@@ -660,16 +662,6 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
             MoveProjectiles(projectiles); 
                       
         }
-
-        //untere rechte ecke Frameinfo
-        mvprintw(LINES - 4,COLS - 12, "            ");
-        mvprintw(LINES - 4,COLS - 12, "f: %d, %d", shields[0].Position->Row, shields[0].Position->Column);
-        mvprintw(LINES - 3,COLS - 12, "            ");
-        mvprintw(LINES - 3,COLS - 12, "s: %d, %d", shields[1].Position->Row, shields[1].Position->Column);
-        mvprintw(LINES - 2,COLS - 12, "            ");
-        mvprintw(LINES - 2,COLS - 12, "Frame: %u", frameCounter);
-        mvprintw(LINES - 1,COLS - 12, "            ");
-        mvprintw(LINES - 1,COLS - 12, "Key: %d", key);
         
         if(breakLoop) break;
         if(gameOver) break;
@@ -799,9 +791,11 @@ int RunGame(InputThread *inputThread)
     /* ================================================================================================================= */
     GameLoop(inputThread, key, breakLoop, player, invaders, projectiles, bombs, shields);
 
-    Dispose(invaders, projectiles, bombs, shields);
+    int score = player.Score;
 
-    return ShowGameOverScreen(inputThread, &player);
+    Dispose(player, invaders, projectiles, bombs, shields);
+
+    return ShowGameOverScreen(inputThread, score);
 }
 
 int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, char ** message, int messageLength)
@@ -849,6 +843,7 @@ int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, 
     ClearTerminal();
     refresh();
 
+    /* quit game on these keys */
     if (result == KEY_Q || result == KEY_q || result == KEY_ESC)
         return 1;
     else
