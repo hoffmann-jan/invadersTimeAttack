@@ -123,6 +123,11 @@ void DrawProjectiles(Projectile projectiles[])
     }
 }
 
+void DrawTime(int timeInSeconds)
+{ 
+    mvprintw(0, 1, "<time: %d>", timeInSeconds);   
+}
+
 void DrawShields(Shield shields[])
 {
     int i = 0;
@@ -336,7 +341,7 @@ void MoveProjectiles(Projectile projectiles[])
     }
 }
 
-void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
+void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[], int timeInSeconds)
 {
     for(int p = 0; p < _MaximumProjectiles; p++)
     {
@@ -401,7 +406,7 @@ void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[
             if (invaders[i].Position->Row == projectiles[p].Position->Row
             && invaders[i].Position->Column == projectiles[p].Position->Column)
             {
-                player->Score += 50;
+                player->Score += timeInSeconds;
                 invaders[i].Health = false;
                 projectiles[p].Collision = true;
                 DeleteChar(projectiles[p].Position);
@@ -528,12 +533,15 @@ void DrawBombs(Bomb bombs[])
     }
 }
 
-bool IsGameOver(Player player, Invader invader[])
+bool IsGameOver(Player player, Invader invader[], int timeInSeconds)
 {
     if (player.Health <= 0)
         return true;
 
     if (player.Position->Row == invader[(_InvaderPerRow * _InvaderRowCount) -1].Position->Row)
+        return true;
+
+    if (timeInSeconds == 0)
         return true;
 
     return false;
@@ -599,10 +607,10 @@ void ShowSplashScreen(InputThread *inputThread)
 void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
 {
     int dropBomb = 0;
+    int timeInSeconds = _Time;
     while(true)
     {
-
-        DetectCollision(&player, invaders, projectiles, bombs, shields);
+        DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);
         DrawPlayer(player);
         DrawBombs(bombs);
         DrawShields(shields);
@@ -610,10 +618,12 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
         DrawInvaders(invaders); 
         DrawScore(player);
         DrawHealth(player);
+        DrawTime(timeInSeconds);
         refresh();
 
         key = inputThread->key;
-        gameOver = IsGameOver(player, invaders);
+
+        gameOver = IsGameOver(player, invaders, timeInSeconds);
 
         switch(key)
         {
@@ -650,6 +660,12 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
         /* 1000000 = 1s */
         usleep(1000000 / _FramesPerSecond);
         frameCounter++;
+        if (frameCounter % _FramesPerSecond == 0
+        && frameCounter > 0)
+        {
+            timeInSeconds--;
+            frameCounter = 0;
+        }
         if (gunCooldown > 0)
             gunCooldown--;
 
@@ -658,7 +674,6 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
         {
             MoveInvaders(invaders);
             dropBomb++;
-            frameCounter = 0;
         }
 
         if((frameCounter % ((int)(_FramesPerSecond / 8)) == 0)) // 8x speed
@@ -762,7 +777,7 @@ int RunGame(InputThread *inputThread)
             shieldRow++;
             cursor = 1;
         }
-        
+
         Position * shieldPosition = (Position *)malloc(sizeof(Position));
         shieldPosition->Column = -1;
         shieldPosition->Row = -1;

@@ -45,6 +45,7 @@
 #define _MaximumBombs 100
 #define _MaximumShields 300
 #define _MaximumProjectiles 20
+#define _Time 333
 
 #define _MoveHorizontalStep 1
 // 
@@ -70,6 +71,7 @@ void BuildShields(Shield shield[]);
 void DrawShields(Shield shield[]);
 void DrawPlayer(Player player);
 void DrawBombs(Bomb bombs[]);
+void DrawTime(int timeInSeconds);
 
 /* game logic*/
 void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount);
@@ -79,12 +81,12 @@ void MoveProjectiles(Projectile projectiles[]);
 void Shoot(Projectile projectiles[], Player player);
 void ValidateInvaderDirection(Invader invader[]);
 void DealShieldDamage(Shield *shield);
-void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[]);
+void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[], int timeInSeconds);
 void DrawScore(Player player);
 void DrawHealth(Player player);
 void DrawProjectiles(Projectile projectiles[]);
 void Test(Player *ply);
-bool IsGameOver(Player player, Invader invader[]);
+bool IsGameOver(Player player, Invader invader[], int timeInSeconds);
 void DropBomb(Invader invader[], Bomb bombs[]);
 
 #endif
