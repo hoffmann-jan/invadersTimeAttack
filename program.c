@@ -651,7 +651,7 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
                 releaseThreadKey(inputThread);
                 break;
             case KEY_Space:
-                if (gunCooldown == 0)
+                if (gunCooldown <= 0)
                 {
                     Shoot(projectiles, player);
                     gunCooldown = _FramesPerSecond; // 1 sec = _FramesPerSecond
@@ -671,7 +671,7 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
             frameCounter = 0;
         }
         if (gunCooldown > 0)
-            gunCooldown--;
+            gunCooldown = gunCooldown - 4;
 
         
         if((frameCounter % (_FramesPerSecond / 2) == 0)) //nach _FramesPerSecond Frames
