@@ -126,7 +126,7 @@ void DrawProjectiles(Projectile projectiles[])
 
 void DrawTime(int timeInSeconds)
 { 
-    mvprintw(0, 1, "<time: %d>", timeInSeconds);   
+    mvprintw(LINES - 2, 1, "<time: %d>", timeInSeconds);
 }
 
 void DrawShields(Shield shields[])
@@ -517,12 +517,12 @@ void DealShieldDamage(Shield *shield)
 void DrawScore(Player player)
 {
     // mvprintw(LINES - 2, 1, "<score: %d>", player.Score);
-    mvprintw(LINES - 2, 1, "<score: %d>", globalScore);
+    mvprintw(LINES - 2, ((int)COLS / 2) - 5, "<score: %d>", globalScore);
 }
 
 void DrawHealth(Player player)
 {
-    mvprintw(LINES - 2, (int)COLS / 2,"<health: %d>", player.Health);
+    mvprintw(LINES - 2, (int)COLS - 12, "<health: %d>", player.Health);
 }
 
 void DrawBombs(Bomb bombs[])
@@ -622,6 +622,7 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
         DrawScore(player);
         DrawHealth(player);
         DrawTime(timeInSeconds);
+        DrawTitle();
         refresh();
 
         key = inputThread->key;
@@ -978,4 +979,9 @@ void MoveBombs(Bomb bombs[])
                 bombs[b].Collision = true;
         }
     }
+}
+
+void DrawTitle()
+{
+    mvprintw(0, ((int)COLS / 2) - 18, "..:: SPACE INVADERS TIME ATTACK ::..");
 }
