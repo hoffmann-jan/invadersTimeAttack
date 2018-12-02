@@ -614,7 +614,6 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
     int timeInSeconds = _Time;
     while(true)
     {
-        DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);
         DrawPlayer(player);
         DrawBombs(bombs);
         DrawShields(shields);
@@ -677,13 +676,16 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
         if((frameCounter % (_FramesPerSecond / 2) == 0)) //nach _FramesPerSecond Frames
         {
             MoveInvaders(invaders);
+            DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);
             dropBomb++;
         }
 
         if((frameCounter % ((int)(_FramesPerSecond / 8)) == 0)) // 8x speed
         {
-            MoveProjectiles(projectiles);         
-            MoveBombs(bombs);             
+            MoveProjectiles(projectiles); 
+            DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);        
+            MoveBombs(bombs);   
+            DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);          
         }
 
         if (dropBomb == 3)
