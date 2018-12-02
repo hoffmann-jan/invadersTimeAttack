@@ -72,6 +72,7 @@ void DrawShields(Shield shield[]);
 void DrawPlayer(Player player);
 void DrawBombs(Bomb bombs[]);
 void DrawTime(int timeInSeconds);
+void DrawTitle();
 
 /* game logic*/
 void GetNextPosition(Position *lastPosition, Position *newPosition, int listCount);
