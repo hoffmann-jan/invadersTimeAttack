@@ -342,8 +342,9 @@ void MoveProjectiles(Projectile projectiles[])
     }
 }
 
-void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[], int timeInSeconds)
+bool DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[], int timeInSeconds)
 {
+    bool allInvadersDefeated = true;
     for(int p = 0; p < _MaximumProjectiles; p++)
     {
         if (projectiles[p].Collision == true)
@@ -472,6 +473,8 @@ void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[
         if (invaders[i].Health == false)
             continue;
 
+        allInvadersDefeated = false;
+
         for(int s = 0; s < _MaximumShields; s++)
         {
             if (shields[s].Health <= 0)
@@ -486,6 +489,7 @@ void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[
         }
     }
 
+    return allInvadersDefeated;
 }
 
 void DealShieldDamage(Shield *shield)
@@ -581,7 +585,7 @@ int ShowGameOverScreen(InputThread *inputThread, int score)
     strcpy(message[1], "");
     strcpy(message[2], "press any key to start .. or 'q' to quit");
 
-    return PrintSplashScreen(inputThread ,image, imageLength, message, messageLength);
+    return PrintSplashScreen(inputThread ,image, imageLength, message, messageLength, false);
 }
 
 void ShowSplashScreen(InputThread *inputThread)
@@ -605,7 +609,7 @@ void ShowSplashScreen(InputThread *inputThread)
     message[0] = malloc(sizeof(char) * 26 + 1 );
     strcpy(message[0], "press any key to start .. ");
 
-    PrintSplashScreen(inputThread, image, imageLength, message, messageLength);
+    PrintSplashScreen(inputThread, image, imageLength, message, messageLength, false);
 }
 
 void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[])
@@ -677,16 +681,16 @@ void GameLoop(InputThread *inputThread, int key, bool breakLoop, Player player, 
         if((frameCounter % (_FramesPerSecond / 2) == 0)) //nach _FramesPerSecond Frames
         {
             MoveInvaders(invaders);
-            DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);
+            gameOver = DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);
             dropBomb++;
         }
 
         if((frameCounter % ((int)(_FramesPerSecond / 8)) == 0)) // 8x speed
         {
             MoveProjectiles(projectiles); 
-            DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);        
+            gameOver = DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);        
             MoveBombs(bombs);   
-            DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);          
+            gameOver = DetectCollision(&player, invaders, projectiles, bombs, shields, timeInSeconds);          
         }
 
         if (dropBomb == 3)
@@ -878,19 +882,39 @@ int RunGame(InputThread *inputThread)
     /* ================================================================================================================= */
     GameLoop(inputThread, key, breakLoop, player, invaders, projectiles, bombs, shields);
 
-    int score = player.Score;
+    int score = globalScore;
+    bool allDefeated = true;
+
+    for(int i = 0; i < _InvaderPerRow * _InvaderRowCount; i++)
+    {
+        if (invaders[i].Health)
+            allDefeated = false;
+    }
+
+    if (allDefeated && player.Health != 0)
+        score = score * player.Health;
 
     Dispose(player, invaders, projectiles, bombs, shields);
+
+    if (allDefeated)
+        return ShowWonScreen(inputThread, score);
 
     return ShowGameOverScreen(inputThread, score);
 }
 
-int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, char ** message, int messageLength)
+int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, char ** message, int messageLength, bool won)
 {
     ClearTerminal();
+    
     int fifth = (int) LINES / 5;
     int startRow = fifth * 2;
     int startColumn = ((int) COLS / 2) - 25;
+
+    if (won)
+    {
+        startRow = 0;
+        startColumn = ((int) COLS / 2) - 25;
+    }
 
     for (int i = 0; i < imageLength; i++)
     {
@@ -899,7 +923,10 @@ int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, 
 
     for (int m = 0; m < messageLength; m++)
     {
-        mvaddstr(fifth * 4 + m, startColumn + 1, message[m]);
+        if (won)
+            mvaddstr(imageLength + 3, startColumn + 10, message[m]);
+        else
+            mvaddstr(fifth * 4 + m, startColumn + 1, message[m]);
     }
 
     refresh();
@@ -984,4 +1011,57 @@ void MoveBombs(Bomb bombs[])
 void DrawTitle()
 {
     mvprintw(0, ((int)COLS / 2) - 18, "..:: SPACE INVADERS TIME ATTACK ::..");
+}
+
+int ShowWonScreen(InputThread *inputThread, int score)
+{
+    int imageLength = 25;
+    char ** image = (char **)malloc(sizeof(char *) * imageLength);
+
+    for (int i = 0; i < imageLength; i++)
+    {
+        image[i] = malloc(sizeof(char) * 50 + 1 );
+    }
+
+    strcpy(image[0], "MMMMMMMMMMWNNNWMMMMMMMMMMMMMMMMMMMWNXXXNMMMMMMMMMM");
+    strcpy(image[1], "MMMMMMMMMWx,',dNMMMMMMMMMMMMMMMMMMXl...oNMMMMMMMMM");
+    strcpy(image[2], "MMMMMMMMMNl. .:KNNWMMMMMMMMMMMMWNN0;   cNMMMMMMMMM");
+    strcpy(image[3], "MMMMMMMMMWX00Oo'.'dNMMMMMMMMMMNo..'oOOOXWMMMMMMMMM");
+    strcpy(image[4], "MMMMMMMMMMNXXXl   ;0XXXXXXXXXX0,   oXNNWMMMMMMMMMM");
+    strcpy(image[5], "MMMMMMMMMNo....    ............    ...'dNMMMMMMMMM");
+    strcpy(image[6], "MMMMMMWWWX:                            :KNNWMMMMMM");
+    strcpy(image[7], "MMMMMWx,,'.   ;xkx,            :kkd'   ..''dWMMMMM");
+    strcpy(image[8], "MMWWNXc       lNWXc            oNWK;       :KXXNMM");
+    strcpy(image[9], "MWd,''.       .','.            .,,'.        ...dWM");
+    strcpy(image[10], "MNc                                            cNM");
+    strcpy(image[11], "MNc   .odo.                            .ldl.   cNM");
+    strcpy(image[12], "MNc   :XMX:                            ;XMX;   cNM");
+    strcpy(image[13], "MNc   :XMX:   'oddddddddddddddddddl.   ;XMX;   cNM");
+    strcpy(image[14], "MNc   :NMX:   :XWWWWWWWMMMMWWWWWWW0,   :XMX:   cNM");
+    strcpy(image[15], "MWKxxx0WMW0xxd:,,,,,,,oNMMNd,,,,,,':dxx0WMW0xdx0WM");
+    strcpy(image[16], "MMMMMMMMMMMMMNc       ;XMMN:       lWMMMMMMMMMMMMM");
+    strcpy(image[17], "MMMMMMMMMMMMMW0oooooooONMMWOooooood0WMMMMMMMMMMMMM");
+    strcpy(image[18], "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
+    strcpy(image[19], "");
+    strcpy(image[20], "    _    _     _____     _______ _ _ ");
+    strcpy(image[21], "   / \\  | |   |_ _\\ \\   / / ____| | |");
+    strcpy(image[22], "  / _ \\ | |    | | \\ \\ / /|  _| | | |");
+    strcpy(image[23], " / ___ \\| |___ | |  \\ V / | |___|_|_|");
+    strcpy(image[24], "/_/   \\_\\_____|___|  \\_/  |_____(_|_)");
+
+    int messageLength = 3;
+    char ** message = (char **)malloc(sizeof(char *) * messageLength);
+
+    for (int i = 0; i < messageLength; i++)
+    {
+        message[i] = malloc(sizeof(char) * 90 + 1 );
+    }
+
+    char *scoreString = (char*)malloc(99 * sizeof(char));
+    sprintf(scoreString, "your winner score: %d", score);
+    strcpy(message[0], scoreString);
+    strcpy(message[1], "");
+    strcpy(message[2], "press any key to start .. or 'q' to quit");
+
+    return PrintSplashScreen(inputThread ,image, imageLength, message, messageLength, true);
 }
