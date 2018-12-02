@@ -775,6 +775,8 @@ int RunGame(InputThread *inputThread)
     int ninth = (int) COLS / 9;
     /* set row for the shields */
     int shieldRow = (int) (LINES / 10) * 8;
+    int firstShieldRow = shieldRow;
+
     while (i < _MaximumShields)
     {
         if (i == (_MaximumShields / 3) || i == (_MaximumShields / 3) * 2)
@@ -791,22 +793,67 @@ int RunGame(InputThread *inputThread)
         {
             while (cursor <= COLS)
             {
-                if ( (ninth < cursor && cursor <= ninth * 2)
-                || (ninth * 3 < cursor && cursor <= ninth * 4)
-                || (ninth * 5 < cursor && cursor <= ninth * 6)
-                || (ninth * 7 < cursor && cursor <= ninth * 8))
+                if (firstShieldRow == shieldRow)
                 {
-                    (*shieldPosition).Column = cursor;
-                    (*shieldPosition).Row = shieldRow;
+                    if ((ninth + 1 < cursor && cursor <= ninth * 2 - 1)
+                    || (ninth * 3 + 1 < cursor && cursor <= ninth * 4 - 1)
+                    || (ninth * 5 + 1 < cursor && cursor <= ninth * 6 - 1)
+                    || (ninth * 7 + 1 < cursor && cursor <= ninth * 8 - 1))
+                    {
+                        (*shieldPosition).Column = cursor;
+                        (*shieldPosition).Row = shieldRow;
+                        cursor++;
+                        break;
+                    }
+                    if (cursor > _MaximumShields)
+                    {
+                        shields[i].Health = 0;
+                        break;
+                    }
                     cursor++;
-                    break;
                 }
-                if (cursor > _MaximumShields)
+                else if (firstShieldRow + 2 == shieldRow)
                 {
-                    shields[i].Health = 0;
-                    break;
+                    if ((ninth < cursor && cursor <= ninth + (ninth / 3))
+                    || (ninth + ( (ninth / 3) * 2) < cursor && cursor <= ninth * 2)
+                    || (ninth * 3 < cursor && cursor <= ninth * 3 + (ninth / 3))
+                    || (ninth * 3 + ( (ninth / 3) * 2) < cursor && cursor <= ninth * 4)
+                    || (ninth * 5 < cursor && cursor <= ninth * 5 + (ninth / 3))
+                    || (ninth * 5 + ( (ninth / 3) * 2) < cursor && cursor <= ninth * 6)
+                    || (ninth * 7 < cursor && cursor <= ninth * 7 + (ninth / 3))
+                    || (ninth * 7 + ( (ninth / 3) * 2) < cursor && cursor <= ninth * 8))
+                    {
+                        (*shieldPosition).Column = cursor;
+                        (*shieldPosition).Row = shieldRow;
+                        cursor++;
+                        break;
+                    }
+                    if (cursor > _MaximumShields)
+                    {
+                        shields[i].Health = 0;
+                        break;
+                    }
+                    cursor++;
                 }
-                cursor++;
+                else
+                {
+                    if ((ninth < cursor && cursor <= ninth * 2)
+                    || (ninth * 3 < cursor && cursor <= ninth * 4)
+                    || (ninth * 5 < cursor && cursor <= ninth * 6)
+                    || (ninth * 7 < cursor && cursor <= ninth * 8))
+                    {
+                        (*shieldPosition).Column = cursor;
+                        (*shieldPosition).Row = shieldRow;
+                        cursor++;
+                        break;
+                    }
+                    if (cursor > _MaximumShields)
+                    {
+                        shields[i].Health = 0;
+                        break;
+                    }
+                    cursor++;
+                }
             }
         }
         else
