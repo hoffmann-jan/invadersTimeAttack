@@ -64,7 +64,8 @@ int RunGame(InputThread *inputThread);
 /* draw support */
 void ShowSplashScreen(InputThread *inputThread);
 int ShowGameOverScreen(InputThread *inputThread, int score);
-int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, char ** message, int messageLength);
+int ShowWonScreen(InputThread *inputThread, int score);
+int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, char ** message, int messageLength, bool won);
 void Draw();
 void DrawInvaders(Invader []);
 void BuildShields(Shield shield[]);
@@ -82,7 +83,7 @@ void MoveProjectiles(Projectile projectiles[]);
 void Shoot(Projectile projectiles[], Player player);
 void ValidateInvaderDirection(Invader invader[]);
 void DealShieldDamage(Shield *shield);
-void DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[], int timeInSeconds);
+bool DetectCollision(Player *player, Invader invaders[], Projectile projectiles[], Bomb bombs[], Shield shields[], int timeInSeconds);
 void DrawScore(Player player);
 void DrawHealth(Player player);
 void DrawProjectiles(Projectile projectiles[]);
