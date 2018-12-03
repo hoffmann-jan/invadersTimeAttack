@@ -913,7 +913,6 @@ int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, 
     if (won)
     {
         startRow = 0;
-        startColumn = ((int) COLS / 2) - 25;
     }
 
     for (int i = 0; i < imageLength; i++)
@@ -924,7 +923,7 @@ int PrintSplashScreen(InputThread *inputThread, char ** image, int imageLength, 
     for (int m = 0; m < messageLength; m++)
     {
         if (won)
-            mvaddstr(imageLength + 3, startColumn + 10, message[m]);
+            mvaddstr(imageLength + 3, startColumn, message[m]);
         else
             mvaddstr(fifth * 4 + m, startColumn + 1, message[m]);
     }
