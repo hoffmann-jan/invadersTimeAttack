@@ -119,7 +119,7 @@ void DrawProjectiles(Projectile projectiles[])
         else
         {
             mvaddch(projectiles[i].Position->Row, projectiles[i].Position->Column, ' ');
-            //DeleteChar(projectiles[i].Position);
+            //DeleteChar(projectiles[i]->Position);
         }
     }
 }
@@ -1019,7 +1019,7 @@ int ShowWonScreen(InputThread *inputThread, int score)
 
     for (int i = 0; i < imageLength; i++)
     {
-        image[i] = malloc(sizeof(char) * 50 + 1 );
+        image[i] = malloc(sizeof(char) * 52 + 1 );
     }
 
     strcpy(image[0], "MMMMMMMMMMWNNNWMMMMMMMMMMMMMMMMMMMWNXXXNMMMMMMMMMM");
@@ -1042,11 +1042,11 @@ int ShowWonScreen(InputThread *inputThread, int score)
     strcpy(image[17], "MMMMMMMMMMMMMW0oooooooONMMWOooooood0WMMMMMMMMMMMMM");
     strcpy(image[18], "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
     strcpy(image[19], "");
-    strcpy(image[20], "    _    _     _____     _______ _ _ ");
-    strcpy(image[21], "   / \\  | |   |_ _\\ \\   / / ____| | |");
-    strcpy(image[22], "  / _ \\ | |    | | \\ \\ / /|  _| | | |");
-    strcpy(image[23], " / ___ \\| |___ | |  \\ V / | |___|_|_|");
-    strcpy(image[24], "/_/   \\_\\_____|___|  \\_/  |_____(_|_)");
+    strcpy(image[20], " ____  _   _ ______     _______     _______ ____  _ ");
+    strcpy(image[21], "/ ___|| | | |  _ \\ \\   / /_ _\\ \\   / / ____|  _ \\| |");
+    strcpy(image[22], "\\___ \\| | | | |_) \\ \\ / / | | \\ \\ / /|  _| | | | | |");
+    strcpy(image[23], " ___) | |_| |  _ < \\ V /  | |  \\ V / | |___| |_| |_|");
+    strcpy(image[24], "|____/ \\___/|_| \\_\\ \\_/  |___|  \\_/  |_____|____/(_)");
 
     int messageLength = 3;
     char ** message = (char **)malloc(sizeof(char *) * messageLength);
